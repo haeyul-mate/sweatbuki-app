@@ -1,0 +1,2799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1B2A4A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sweatbuki">
+<title>Sweatbuki</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231B2A4A' rx='32'/><text x='96' y='132' font-size='110' text-anchor='middle'>💪</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#1B2A4A; --navy-dark:#0D1B2E; --navy-mid:#162038;
+  --gold:#F5C518; --gold-light:#FDF0A0;
+  --white:#FFFFFF; --text:#FFFFFF; --text2:#A0B0C0;
+  --border:rgba(255,255,255,0.08);
+  --danger:#EF4444; --success:#10B981;
+  --bg:var(--navy-dark); --card:var(--navy); --card2:var(--navy-mid);
+}
+[data-theme="light"]{
+  --navy:#F5F7FA; --navy-dark:#FFFFFF; --navy-mid:#EAEEF3;
+  --gold:#D4A413; --gold-light:#F5C518;
+  --white:#1B2A4A; --text:#1B2A4A; --text2:#5A6B80;
+  --border:rgba(0,0,0,0.08);
+  --bg:#FFFFFF; --card:#F5F7FA; --card2:#EAEEF3;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;
+  background:var(--bg); color:var(--text);
+  line-height:1.5; font-size:14px;
+  padding-bottom:env(safe-area-inset-bottom);
+  user-select:none; -webkit-user-select:none;
+}
+input,textarea,select{user-select:text;-webkit-user-select:text}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{
+  font-family:inherit; background:var(--card2); color:var(--text);
+  border:1px solid var(--border); border-radius:10px;
+  padding:10px 12px; font-size:14px; width:100%; outline:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:60px}
+
+#splash{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;transition:opacity 0.5s ease;
+}
+#splash.hide{opacity:0;pointer-events:none}
+#splash .logo{font-size:80px;margin-bottom:16px;animation:pulse 1.4s ease-in-out infinite}
+#splash h1{color:var(--gold);font-size:36px;font-weight:900;letter-spacing:-1px}
+#splash .sub{color:var(--text2);font-size:14px;letter-spacing:4px;margin-top:4px;text-transform:uppercase}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+header{
+  position:sticky;top:0;z-index:100;
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));
+  display:flex;align-items:center;justify-content:space-between;
+}
+header .brand{display:flex;align-items:center;gap:8px}
+header .brand .ico{font-size:24px}
+header .brand h1{font-size:18px;font-weight:800;color:var(--gold)}
+header .actions button{
+  background:var(--card2);border-radius:8px;padding:8px 10px;font-size:16px;
+  border:1px solid var(--border);
+}
+
+#banner-top{
+  background:var(--card2);border-bottom:1px dashed var(--border);
+  text-align:center;padding:12px;font-size:11px;color:var(--text2);
+  letter-spacing:1px;text-transform:uppercase;
+}
+
+main{padding:16px;padding-bottom:96px;min-height:calc(100vh - 60px)}
+.tab{display:none}
+.tab.active{display:block}
+
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:16px;margin-bottom:12px;
+}
+.card h2{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card h3{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:8px}
+
+.section-title{
+  font-size:18px;font-weight:800;margin-bottom:12px;
+  display:flex;align-items:center;gap:6px;color:var(--gold);
+}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--card2);color:var(--text);
+  border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;font-size:14px;font-weight:600;
+  transition:transform 0.1s;
+}
+.btn:active{transform:scale(0.97)}
+.btn.primary{background:var(--gold);color:var(--navy-dark);border-color:var(--gold)}
+.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn.full{width:100%}
+.btn.sm{padding:6px 10px;font-size:12px}
+.btn.lg{padding:14px 18px;font-size:16px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+.chip{
+  display:inline-flex;align-items:center;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:999px;padding:5px 10px;font-size:12px;
+  color:var(--text2);margin:0 4px 4px 0;
+}
+.chip.gold{background:var(--gold);color:var(--navy-dark);border-color:var(--gold);font-weight:700}
+.chip.rx{background:var(--success);color:#fff;border-color:var(--success);font-weight:700}
+.chip.scaled{background:var(--gold);color:var(--navy-dark);border-color:var(--gold);font-weight:700}
+.chip.modified{background:var(--text2);color:var(--navy-dark);border-color:var(--text2);font-weight:700}
+.chip.pr{background:#10B981;color:#fff;border-color:#10B981;font-weight:700}
+
+.pills{
+  display:flex;gap:6px;background:var(--card2);
+  padding:4px;border-radius:10px;margin-bottom:12px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.pills::-webkit-scrollbar{display:none}
+.pill{
+  flex:1 0 auto;text-align:center;
+  padding:8px 12px;border-radius:8px;
+  font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap;
+}
+.pill.active{background:var(--gold);color:var(--navy-dark)}
+
+.wod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.wod-tile{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:14px 10px;
+  text-align:center;cursor:pointer;
+  font-weight:700;color:var(--gold);font-size:14px;
+}
+.wod-tile:active{transform:scale(0.96)}
+.wod-tile .badge{display:block;font-size:10px;color:var(--text2);font-weight:500;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+.wod-tile .cnt{display:block;font-size:10px;color:var(--text2);margin-top:2px}
+
+.record-item{
+  background:var(--card2);border-radius:10px;
+  padding:10px 12px;margin-bottom:6px;
+  display:flex;align-items:center;justify-content:space-between;font-size:13px;
+}
+.record-item .lhs{flex:1;min-width:0}
+.record-item .name{font-weight:600;color:var(--text)}
+.record-item .meta{color:var(--text2);font-size:11px;margin-top:2px;line-height:1.4}
+.record-item .val{font-weight:700;color:var(--gold);font-size:14px;margin-left:8px;flex-shrink:0}
+
+.form-row{margin-bottom:10px}
+.form-row label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:600}
+.form-row .grid2,.form-row.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.form-row .grid3,.form-row.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card2);border-radius:10px;padding:12px;text-align:center}
+.stat .v{font-size:22px;font-weight:800;color:var(--gold)}
+.stat .l{font-size:11px;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+
+.timer-display{
+  background:var(--card);border:2px solid var(--gold);
+  border-radius:16px;padding:32px 16px;text-align:center;margin-bottom:12px;
+  box-shadow:0 0 20px rgba(245,197,24,0.15);
+}
+.timer-big{
+  font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;
+  letter-spacing:-2px;color:var(--gold);
+  font-family:'SF Mono',Menlo,monospace;line-height:1;
+}
+.timer-sub{font-size:14px;color:var(--text2);margin-top:6px}
+.timer-status{
+  display:inline-block;padding:4px 12px;border-radius:999px;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  margin-top:8px;background:var(--card2);color:var(--text2);
+}
+.timer-status.work{background:var(--success);color:#fff}
+.timer-status.rest{background:var(--gold);color:var(--navy-dark)}
+
+#tabbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:var(--card);border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(5,1fr);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#tabbar button{
+  padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:9px;color:var(--text2);font-weight:600;
+}
+#tabbar button .tico{font-size:20px;line-height:1}
+#tabbar button.active{color:var(--gold)}
+
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  z-index:200;display:none;align-items:flex-end;justify-content:center;
+}
+.modal-bg.show{display:flex}
+.modal{
+  background:var(--bg);width:100%;max-width:520px;max-height:90vh;
+  border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;
+  animation:slideup 0.25s ease-out;
+}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal h2{margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.modal .close{font-size:20px;color:var(--text2);background:none;border:none}
+
+#toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:var(--navy-dark);
+  padding:10px 16px;border-radius:999px;
+  font-weight:700;font-size:13px;z-index:300;display:none;
+  box-shadow:0 8px 20px rgba(0,0,0,0.3);
+}
+#toast.show{display:block;animation:fadein 0.3s}
+@keyframes fadein{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.empty{text-align:center;color:var(--text2);padding:30px 12px;font-size:13px}
+.muted{color:var(--text2);font-size:12px}
+.hi{color:var(--gold);font-weight:700}
+
+.lift-pct{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;font-variant-numeric:tabular-nums}
+.lift-pct .row{display:flex;justify-content:space-between;background:var(--card2);padding:6px 10px;border-radius:8px}
+.lift-pct .pp{color:var(--text2);font-weight:600}
+.lift-pct .pv{color:var(--gold);font-weight:700}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+table th{text-align:left;color:var(--text2);font-weight:600;padding:6px 4px;border-bottom:1px solid var(--border)}
+table td{padding:6px 4px;border-bottom:1px solid var(--border)}
+
+.opt-row{display:flex;gap:6px;flex-wrap:wrap}
+.opt{
+  flex:1;min-width:48px;text-align:center;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;padding:8px;font-size:12px;font-weight:600;
+  color:var(--text2);
+}
+.opt.active{background:var(--gold);color:var(--navy-dark);border-color:var(--gold)}
+
+.bar-display{
+  background:var(--card2);border-radius:14px;padding:18px;
+  text-align:center;margin-bottom:10px;
+}
+.bar-total{font-size:42px;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums}
+.bar-sides{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.5}
+.plate-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;background:var(--card2);padding:8px 12px;border-radius:10px}
+.plate-row .pname{flex:1;font-weight:600}
+.plate-ops{display:flex;gap:4px}
+.plate-ops button{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:14px;font-weight:700;min-width:36px}
+.plate-ops .cnt{min-width:28px;text-align:center;color:var(--gold);font-weight:700;font-size:14px;line-height:28px}
+
+canvas{max-width:100%}
+
+.timeline{position:relative;padding-left:18px}
+.timeline:before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--border)}
+.timeline-item{position:relative;margin-bottom:10px;padding:8px 12px;background:var(--card2);border-radius:10px}
+.timeline-item:before{content:'';position:absolute;left:-18px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+
+.met-dot{
+  width:120px;height:120px;border-radius:50%;
+  background:var(--card2);border:4px solid var(--gold);
+  margin:0 auto 14px;transition:background 0.05s,transform 0.08s;
+}
+.met-dot.beat{background:var(--gold);transform:scale(1.05)}
+.met-dot.beat-one{background:var(--success);transform:scale(1.1)}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="logo">💪</div>
+  <h1>Sweatbuki</h1>
+  <div class="sub">Train · Track · Triumph</div>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="ico">💪</div>
+    <h1>Sweatbuki</h1>
+  </div>
+  <div class="actions">
+    <button id="themeToggle">🌙</button>
+  </div>
+</header>
+
+<div id="banner-top">📢 Banner Ad Placeholder</div>
+
+<main>
+
+<section class="tab active" id="tab-wod">
+  <div class="section-title">🏋️ WOD</div>
+  <div class="pills">
+    <div class="pill active" data-wpill="benchmark">Benchmark</div>
+    <div class="pill" data-wpill="custom">Custom</div>
+    <div class="pill" data-wpill="log">Log</div>
+  </div>
+  <div id="wodArea"></div>
+</section>
+
+<section class="tab" id="tab-lifting">
+  <div class="section-title">💪 Training</div>
+  <div class="pills">
+    <div class="pill active" data-lpill="lifts">1RM</div>
+    <div class="pill" data-lpill="gym">Gymnastics</div>
+    <div class="pill" data-lpill="run">Running</div>
+    <div class="pill" data-lpill="calc">Calculator</div>
+    <div class="pill" data-lpill="bar">Bar Loading</div>
+  </div>
+  <div id="liftArea"></div>
+</section>
+
+<section class="tab" id="tab-timer">
+  <div class="section-title">⏱️ Timer</div>
+  <div class="pills" id="timerPills">
+    <div class="pill active" data-tgroup="stopwatch">🕐 Stopwatch</div>
+    <div class="pill" data-tgroup="timer">⏲️ Timer</div>
+    <div class="pill" data-tgroup="metronome">🎵 Metronome</div>
+  </div>
+  <div id="timerArea"></div>
+</section>
+
+<section class="tab" id="tab-analysis">
+  <div class="section-title">📊 Analysis</div>
+  <div class="pills">
+    <div class="pill active" data-apill="prtimeline">PR Timeline</div>
+    <div class="pill" data-apill="bodylift">Body vs Lifting</div>
+    <div class="pill" data-apill="wodstats">WOD Stats</div>
+    <div class="pill" data-apill="open">Open Scores</div>
+  </div>
+  <div id="analysisArea"></div>
+</section>
+
+<section class="tab" id="tab-settings">
+  <div class="section-title">⚙️ Settings</div>
+  <div id="settingsArea"></div>
+</section>
+
+</main>
+
+<nav id="tabbar">
+  <button class="active" data-tab="wod"><span class="tico">🏋️</span><span>WOD</span></button>
+  <button data-tab="lifting"><span class="tico">💪</span><span>Training</span></button>
+  <button data-tab="timer"><span class="tico">⏱️</span><span>Timer</span></button>
+  <button data-tab="analysis"><span class="tico">📊</span><span>Analysis</span></button>
+  <button data-tab="settings"><span class="tico">⚙️</span><span>Settings</span></button>
+</nav>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+
+<script>
+//=========================================================
+// DATA
+//=========================================================
+const HERO_WODS = [
+  {n:'Murph',t:'For Time',d:'1mi Run\n100 Pull-ups\n200 Push-ups\n300 Air Squats\n1mi Run\n(20/14 lb vest)'},
+  {n:'DT',t:'5 RFT',d:'12 Deadlifts (155/105 lb)\n9 Hang Power Cleans\n6 Push Jerks'},
+  {n:'Nate',t:'20 min AMRAP',d:'2 Muscle-ups\n4 HSPU\n8 KB Swings (70/53 lb)'},
+  {n:'Randy',t:'For Time',d:'75 Power Snatches (75/55 lb)'},
+  {n:'Jason',t:'For Time',d:'100 Squats, 5 MU\n75 Squats, 10 MU\n50 Squats, 15 MU\n25 Squats, 20 MU'},
+  {n:'Josh',t:'For Time',d:'21 OHS (95/65 lb), 42 Pull-ups\n15 OHS, 30 Pull-ups\n9 OHS, 18 Pull-ups'},
+  {n:'Jack',t:'20 min AMRAP',d:'10 Push Press (115/80 lb)\n10 KB Swings (53/35 lb)\n10 Box Jumps 24/20"'},
+  {n:'Michael',t:'3 RFT',d:'800m Run\n50 Back Extensions\n50 Sit-ups'},
+  {n:'Danny',t:'20 min AMRAP',d:'30 Box Jumps 24"\n20 Push Press (115/80 lb)\n30 Pull-ups'},
+  {n:'Ryan',t:'5 RFT',d:'7 Muscle-ups\n21 Burpees'},
+  {n:'JT',t:'21-15-9',d:'HSPU\nRing Dips\nPush-ups'},
+  {n:'Chad',t:'For Time',d:'1000 Box Step-ups (20")\n(45/35 lb vest)'},
+  {n:'Luce',t:'3 RFT (20 lb vest)',d:'1km Run\n10 Muscle-ups\n100 Air Squats'},
+  {n:'Rahoi',t:'12 min AMRAP',d:'12 Box Jumps 24/20"\n6 Thrusters (95/65 lb)\n6 Bar-Facing Burpees'},
+  {n:'Mr. Joshua',t:'5 RFT',d:'400m Run\n30 GHD Sit-ups\n15 Deadlifts (250/170 lb)'},
+  {n:'Abbate',t:'For Time',d:'1mi Run\n21 Clean & Jerks (155/105 lb)\n800m Run\n21 C&J\n1mi Run'},
+  {n:'Bradshaw',t:'10 RFT',d:'3 HSPU\n6 Deadlifts (225/155 lb)\n12 Pull-ups\n24 Double-Unders'},
+  {n:'Laredo',t:'6 RFT',d:'24 Squats\n24 Push-ups\n24 Walking Lunges\n400m Run'},
+  {n:'Griff',t:'For Time',d:'800m Run\n400m Backward Run\n800m Run\n400m Backward Run'},
+  {n:'Loredo',t:'6 RFT',d:'24 Squats\n24 Push-ups\n24 Walking Lunges\n400m Run'},
+  {n:'Blake',t:'4 RFT (20 lb vest)',d:'100ft Walking Lunge\n30 Box Jumps 24"\n20 Wall Balls (20/14 lb)\n10 HSPU'},
+  {n:'Hansen',t:'5 RFT',d:'30 KB Swings (70/53 lb)\n30 Burpees\n30 GHD Sit-ups'},
+  {n:'McGhee',t:'30 min AMRAP',d:'5 Deadlifts (275/185 lb)\n13 Push-ups\n9 Box Jumps 24"'},
+  {n:'Holleyman',t:'30 RFT',d:'5 Wall Balls (20/14 lb)\n3 HSPU\n1 Power Clean (225/155 lb)'},
+  {n:'Bruck',t:'4 RFT',d:'19 Toes-to-Bar\n19 DB Push Press (50/35 lb)\n50ft Yoke Carry'},
+  {n:'Buriak',t:'7 RFT',d:'400m Run\n30 Sandbag Lunges\n7 Toes-to-Bar'},
+  {n:'Drew',t:'3 RFT',d:'25 Burpee Pull-ups\n50 Cal Row\n100m Bear Crawl'},
+  {n:'Topsy',t:'6 RFT',d:'7 Strict Pull-ups\n14 KB Swings (53/35 lb)\n21 Air Squats'},
+  {n:'Spealler',t:'For Time',d:'5 RFT:\n5 Deadlifts (315/205 lb)\n10 Burpees\n15 GHD Sit-ups'},
+  {n:'Arnie',t:'For Time (1 KB 70/53 lb)',d:'21 TGU Right\n50 KB Swings\n21 OHS Left\n50 KB Swings\n21 OHS Right\n50 KB Swings\n21 TGU Left'},
+];
+
+const GIRL_WODS = [
+  {n:'Fran',t:'21-15-9',d:'Thrusters (95/65 lb)\nPull-ups'},
+  {n:'Grace',t:'For Time',d:'30 Clean & Jerks (135/95 lb)'},
+  {n:'Helen',t:'3 RFT',d:'400m Run\n21 KB Swings (53/35 lb)\n12 Pull-ups'},
+  {n:'Annie',t:'50-40-30-20-10',d:'Double-Unders\nSit-ups'},
+  {n:'Diane',t:'21-15-9',d:'Deadlifts (225/155 lb)\nHSPU'},
+  {n:'Elizabeth',t:'21-15-9',d:'Cleans (135/95 lb)\nRing Dips'},
+  {n:'Karen',t:'For Time',d:'150 Wall Balls (20/14 lb)'},
+  {n:'Nancy',t:'5 RFT',d:'400m Run\n15 OHS (95/65 lb)'},
+  {n:'Isabel',t:'For Time',d:'30 Snatches (135/95 lb)'},
+  {n:'Jackie',t:'For Time',d:'1000m Row\n50 Thrusters (45/35 lb)\n30 Pull-ups'},
+  {n:'Linda',t:'10-9-8-7-6-5-4-3-2-1',d:'Deadlift 1.5×BW\nBench 1×BW\nClean 0.75×BW'},
+  {n:'Mary',t:'20 min AMRAP',d:'5 HSPU\n10 Pistol Squats\n15 Pull-ups'},
+  {n:'Kelly',t:'5 RFT',d:'400m Run\n30 Box Jumps 24"\n30 Wall Balls (20/14 lb)'},
+  {n:'Barbara',t:'5 R (3min rest)',d:'20 Pull-ups\n30 Push-ups\n40 Sit-ups\n50 Squats',scoreType:'time'},
+  {n:'Chelsea',t:'EMOM 30 min',d:'5 Pull-ups\n10 Push-ups\n15 Squats',scoreType:'amrap'},
+  {n:'Cindy',t:'20 min AMRAP',d:'5 Pull-ups\n10 Push-ups\n15 Squats'},
+  {n:'Amanda',t:'9-7-5',d:'Muscle-ups\nSnatches (135/95 lb)'},
+  {n:'Angie',t:'For Time',d:'100 Pull-ups\n100 Push-ups\n100 Sit-ups\n100 Squats'},
+  {n:'Eva',t:'5 RFT',d:'800m Run\n30 KB Swings (70/53 lb)\n30 Pull-ups'},
+  {n:'Gwen',t:'15-12-9',d:'Clean & Jerks (Touch & Go, Unbroken)\nHeaviest possible',scoreType:'load'},
+  {n:'Nicole',t:'20 min AMRAP',d:'400m Run\nMax Pull-ups (record per round)',scoreType:'reps'},
+  {n:'Pam',t:'10 RFT',d:'15 Wall Balls\n12 KB Swings\n9 KB Snatches\n6 Burpees\n3 Wall Walks'},
+  {n:'Ingrid',t:'10 RFT',d:'10 KB Snatches (53/35 lb)\n10 Box Jumps\n10 Burpees'},
+  {n:'Lola',t:'5 RFT',d:'400m Run\n21 KB Swings (53/35 lb)\n12 Burpee Pull-ups'},
+  {n:'Candy',t:'5 RFT',d:'20 Pull-ups\n40 Push-ups\n60 Squats'},
+  {n:'Tabata Something Else',t:'Tabata (8R 20/10)',d:'Pull-ups\nPush-ups\nSit-ups\nSquats',scoreType:'reps'},
+  {n:'Death by Pull-ups',t:'EMOM (until failure)',d:'1 Pull-up min 1\n2 Pull-ups min 2\n3 Pull-ups min 3 ...',scoreType:'amrap'},
+];
+
+const NOTABLE_WODS = [
+  {n:'Filthy Fifty',t:'For Time',d:'50-50-50-50-50-50-50-50-50-50 of:\nBox Jumps 24/20"\nJumping Pull-ups\nKB Swings (35/25 lb)\nWalking Lunges\nKnees to Elbows\nPush Press (45/35 lb)\nBack Extensions\nWall Balls (20/14 lb)\nBurpees\nDouble-Unders'},
+  {n:'Tabata This',t:'Tabata (5×8R 20/10, 1min rest)',d:'Pull-ups\nSquats\nPush-ups\nSit-ups\nRow (cal)\nScore = total reps',scoreType:'reps'},
+  {n:'Fight Gone Bad',t:'3 R (1min each, 1min rest)',d:'Wall Balls (20/14 lb)\nSDLHP (75/55 lb)\nBox Jumps 20"\nPush Press (75/55 lb)\nRow (cal)\nScore = total reps',scoreType:'reps'},
+  {n:'The Chief',t:'5×3min AMRAP (1min rest)',d:'3 Power Cleans (135/95 lb)\n6 Push-ups\n9 Air Squats\nScore = total rounds',scoreType:'amrap'},
+  {n:'The Seven',t:'7 RFT',d:'7 HSPU\n7 Thrusters (135/85 lb)\n7 KB Swings (70/53 lb)\n7 Pull-ups\n7 Burpees\n7 Power Cleans (115/80 lb)'},
+  {n:'Tommy V',t:'For Time',d:'21 Thrusters (115/75 lb)\n12 Rope Climbs\n15 Thrusters\n9 Rope Climbs\n9 Thrusters\n6 Rope Climbs'},
+  {n:'Glen',t:'For Time',d:'30 Clean & Jerks (135/95 lb)\n1mi Run\n10 Rope Climbs\n1mi Run\n100 Burpees'},
+  {n:'Bull',t:'2 RFT',d:'200 Double-Unders\n50 OHS (135/95 lb)\n50 Pull-ups\n1mi Run'},
+  {n:'Lumberjack 20',t:'For Time',d:'20 Deadlifts (275/185 lb)\n400m Run\n20 KB Swings (70/53 lb)\n400m Run\n20 OHS (115/75 lb)\n400m Run\n20 Burpees\n400m Run\n20 C2B Pull-ups\n400m Run\n20 Box Jumps 24"\n400m Run\n20 DB Squat Cleans (45/30 lb)\n400m Run'},
+  {n:'Death by 10 Meters',t:'EMOM (until failure)',d:'Min 1 = 1×10m\nMin 2 = 2×10m\n...add 10m each minute',scoreType:'amrap'},
+  {n:'Death by Burpees',t:'EMOM (until failure)',d:'Min 1 = 1 burpee\nMin 2 = 2 burpees\n...',scoreType:'amrap'},
+  {n:'17.5',t:'For Time (40 min cap)',d:'10 RFT:\n9 Thrusters (95/65 lb)\n35 Double-Unders'},
+  {n:'HYROX PFT',t:'For Time',d:'For Time, no rest between stations.\n1000m Run (treadmill 2% incline or outdoor)\n50 Burpee Broad Jumps\n100 Stationary Lunges (alternating)\n1000m Row\n30 Hand Release Push-ups\n100 Wall Balls (20/14 lb or 6/4 kg)\n\nDivision benchmarks: Pro <22:00, Open 22-26:00, Doubles 30-45:00'},
+];
+
+const SIG_PRESETS = [
+  {n:'CHUNGHUN',t:'TC 24 min',d:'Buy-in: Jog to Chunghun Park (Warm-up pace)\n8 Rounds for total active time:\n  Uphill Sprint (target under 1:00)\n  Rest: Walk back down 2:00\nCash-out: Jog back to the Box\nScore = sum of all sprint times + 14 min fixed rest'},
+  {n:'FAIRY',t:'For Time',d:'Cash in: 2000m Row, 22 Burpees\n3 Rounds:\n  11 Single-leg DB DL (50/35 lb) (L+R=1)\n  17 Single-arm OH DB Lunge (L+R=1)\n  20 Alt Single-arm DB C&J (L+R=2)\n  22 Alt Single-arm DB Snatch (L+R=2)\nCash out: 1100m Row, 17 Burpees'},
+];
+
+const LIFT_NAMES = [
+  {k:'backsquat',n:'Back Squat'},
+  {k:'frontsquat',n:'Front Squat'},
+  {k:'deadlift',n:'Deadlift'},
+  {k:'bench',n:'Bench Press'},
+  {k:'shoulderpress',n:'Shoulder Press'},
+  {k:'clean',n:'Clean'},
+  {k:'powerclean',n:'Power Clean'},
+  {k:'snatch',n:'Snatch'},
+  {k:'powersnatch',n:'Power Snatch'},
+  {k:'ohs',n:'OHS'},
+  {k:'cleanjerk',n:'Clean & Jerk'},
+];
+
+const GYM_NAMES = [
+  {k:'pullup',n:'Pull-up Max',unit:'reps'},
+  {k:'doubleunder',n:'Double-Under Max',unit:'reps'},
+  {k:'hspu',n:'HSPU Max',unit:'reps'},
+  {k:'pistol',n:'Pistol Max',unit:'reps each'},
+  {k:'muscleup',n:'Muscle-up Max',unit:'reps'},
+  {k:'t2b',n:'T2B Max',unit:'reps'},
+  {k:'ringdip',n:'Ring Dip Max',unit:'reps'},
+  {k:'lsit',n:'L-sit Max',unit:'sec'},
+];
+
+const RUN_PRESETS = [
+  {k:'400m',n:'400m',m:400},
+  {k:'800m',n:'800m',m:800},
+  {k:'1km',n:'1 km',m:1000},
+  {k:'1mi',n:'1 mile',m:1609.344},
+  {k:'5km',n:'5 km',m:5000},
+  {k:'10km',n:'10 km',m:10000},
+  {k:'half',n:'Half Marathon',m:21097.5},
+  {k:'full',n:'Marathon',m:42195},
+];
+
+const TEMP_OPTS = [
+  {v:'Hot',l:'🥵'},
+  {v:'Normal',l:'🌤️'},
+  {v:'Cold',l:'🥶'},
+];
+const HUMIDITY_OPTS = [
+  {v:'Dry',l:'🏜️'},
+  {v:'Normal',l:'💨'},
+  {v:'Humid',l:'💧'},
+];
+
+//=========================================================
+// STATE
+//=========================================================
+const KEY = 'sweatbuki_v1';
+let S = {
+  wodLogs:[],
+  customWods:[],
+  liftingRecords:[],
+  gymnasticsRecords:[],
+  runningRecords:[],
+  openScores:[],
+  settings:{theme:'dark',unit:'lb'}
+};
+
+function migrateState(){
+  // wodLogs: split legacy weather → temperature/humidity
+  S.wodLogs.forEach(w=>{
+    if(w.temperature || w.humidity) return;
+    if(w.weather){
+      const wx = String(w.weather).toLowerCase();
+      if(wx === 'hot'){ w.temperature = 'Hot'; w.humidity = 'Normal'; }
+      else if(wx === 'cold'){ w.temperature = 'Cold'; w.humidity = 'Normal'; }
+      else if(wx === 'rainy'){ w.temperature = 'Normal'; w.humidity = 'Humid'; }
+      else if(wx === 'sunny'){ w.temperature = 'Normal'; w.humidity = 'Dry'; }
+      else { w.temperature = 'Normal'; w.humidity = 'Normal'; }
+    }
+  });
+  // legacy Body tab data → bodyWeight on a date-matched WOD log, or standalone log
+  if(Array.isArray(S.bodyEntries) && S.bodyEntries.length){
+    S.bodyEntries.forEach(b=>{
+      if(!b || !b.date || !b.weight) return;
+      const match = S.wodLogs.find(w=>w.date===b.date && !w.bodyWeight);
+      if(match){
+        match.bodyWeight = b.weight;
+        match.bodyWeightUnit = b.unit || 'lb';
+      } else {
+        S.wodLogs.push({
+          id:uid(), date:b.date, wodName:'(BW Log)', score:'—', rxStatus:'Modified',
+          partner:false, notes:b.notes||'', category:'system',
+          bodyWeight:b.weight, bodyWeightUnit:b.unit||'lb',
+          temperature:'Normal', humidity:'Normal',
+        });
+      }
+    });
+    delete S.bodyEntries;
+  }
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const data = JSON.parse(raw);
+      Object.assign(S, data);
+      if(!S.settings) S.settings = {theme:'dark',unit:'lb'};
+      if(!S.settings.unit) S.settings.unit = 'lb';
+      if(!S.settings.theme) S.settings.theme = 'dark';
+      if(!Array.isArray(S.wodLogs)) S.wodLogs = [];
+      if(!Array.isArray(S.customWods)) S.customWods = [];
+      if(!Array.isArray(S.liftingRecords)) S.liftingRecords = [];
+      if(!Array.isArray(S.gymnasticsRecords)) S.gymnasticsRecords = [];
+      if(!Array.isArray(S.runningRecords)) S.runningRecords = [];
+      if(!Array.isArray(S.openScores)) S.openScores = [];
+      migrateState();
+    }
+  }catch(e){console.warn(e)}
+}
+function saveState(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){console.warn(e)}
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7) }
+function today(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDate(s){
+  if(!s) return '';
+  const d = new Date(s);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtTime(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const m = Math.floor(sec/60), s = sec%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function fmtTimeMs(ms){
+  ms = Math.max(0, ms);
+  const total = Math.floor(ms/10);
+  const cs = total%100;
+  const sec = Math.floor(total/100);
+  const m = Math.floor(sec/60), s = sec%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+}
+function fmtSecondsHuman(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+  if(h>0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+const KG_TO_LB = 2.20462;
+function convertWeight(w, fromUnit, toUnit){
+  if(w == null || w === '') return null;
+  const v = parseFloat(w);
+  if(isNaN(v)) return null;
+  if(fromUnit === toUnit) return v;
+  if(fromUnit === 'kg' && toUnit === 'lb') return v * KG_TO_LB;
+  if(fromUnit === 'lb' && toUnit === 'kg') return v / KG_TO_LB;
+  return v;
+}
+function dispWeight(w, srcUnit){
+  const v = convertWeight(w, srcUnit||'lb', S.settings.unit);
+  if(v == null) return '—';
+  return `${Math.round(v*10)/10} ${S.settings.unit}`;
+}
+function rawToCurrent(w, srcUnit){
+  return convertWeight(w, srcUnit||'lb', S.settings.unit);
+}
+
+//=========================================================
+// SCORE TYPE / FORMAT
+//=========================================================
+function classifyScoreType(wodType, wod){
+  if(wod && wod.scoreType) return wod.scoreType;
+  if(!wodType) return 'time';
+  const t = String(wodType).toLowerCase();
+  if(t.includes('amrap')) return 'amrap';
+  if(t.includes('death by') || t.includes('until failure')) return 'amrap';
+  if(t.includes('emom')) return 'amrap';
+  if(t.includes('for reps') || t.includes('max reps')) return 'reps';
+  if(t.includes('for load') || t.includes('max load')) return 'load';
+  if(t.includes('tabata')) return 'reps';
+  return 'time'; // For Time, RFT, 21-15-9, etc.
+}
+function findAnyWodByName(name){
+  if(!name) return null;
+  const found = HERO_WODS.find(w=>w.n===name)
+    || GIRL_WODS.find(w=>w.n===name)
+    || NOTABLE_WODS.find(w=>w.n===name)
+    || SIG_PRESETS.find(w=>w.n===name);
+  if(found) return found;
+  const c = S.customWods.find(w=>w.name===name);
+  if(c) return {n:c.name, t:c.type, d:c.description, scoreType:c.scoreType};
+  return null;
+}
+function isPartnerWod(wod){
+  if(!wod) return false;
+  const blob = `${wod.t||''} ${wod.d||''} ${wod.n||''}`;
+  return /partner|team/i.test(blob);
+}
+function parseTimeStr(str){
+  if(!str) return null;
+  const parts = String(str).trim().split(':').map(p=>parseInt(p,10));
+  if(parts.some(isNaN)) return null;
+  if(parts.length === 1) return parts[0];
+  if(parts.length === 2) return parts[0]*60 + parts[1];
+  if(parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+  return null;
+}
+// Build scoreData from form fields based on type. Returns {scoreData, display} or null on invalid.
+function buildScoreFromForm(stype){
+  if(stype === 'time'){
+    const h = parseInt(document.getElementById('sc_h').value)||0;
+    const m = parseInt(document.getElementById('sc_m').value)||0;
+    const s = parseInt(document.getElementById('sc_s').value)||0;
+    const total = h*3600 + m*60 + s;
+    if(total <= 0) return null;
+    return {scoreData:{type:'time', totalSeconds:total}, display:fmtSecondsHuman(total)};
+  }
+  if(stype === 'amrap'){
+    const r = parseInt(document.getElementById('sc_rounds').value)||0;
+    const e = parseInt(document.getElementById('sc_extra').value)||0;
+    if(r < 0 || e < 0) return null;
+    if(r === 0 && e === 0) return null;
+    return {scoreData:{type:'amrap', rounds:r, extra:e}, display:`${r}+${e}`};
+  }
+  if(stype === 'reps'){
+    const v = parseInt(document.getElementById('sc_reps').value);
+    if(!v || v <= 0) return null;
+    return {scoreData:{type:'reps', value:v}, display:`${v} reps`};
+  }
+  if(stype === 'load'){
+    const v = parseFloat(document.getElementById('sc_load').value);
+    if(!v || v <= 0) return null;
+    return {scoreData:{type:'load', value:v, unit:S.settings.unit}, display:`${Math.round(v*10)/10} ${S.settings.unit}`};
+  }
+  return null;
+}
+function formatScoreData(sd){
+  if(!sd) return '';
+  if(sd.type === 'time') return fmtSecondsHuman(sd.totalSeconds||0);
+  if(sd.type === 'amrap') return `${sd.rounds||0}+${sd.extra||0}`;
+  if(sd.type === 'reps') return `${sd.value||0} reps`;
+  if(sd.type === 'load'){
+    const v = convertWeight(sd.value, sd.unit||'lb', S.settings.unit);
+    return `${Math.round(v*10)/10} ${S.settings.unit}`;
+  }
+  return '';
+}
+// Comparison key for PR detection (higher = better, except time where lower=better)
+function scoreCompareValue(sd){
+  if(!sd) return null;
+  if(sd.type === 'time') return -(sd.totalSeconds||0); // lower seconds = better → larger neg
+  if(sd.type === 'amrap') return (sd.rounds||0)*10000 + (sd.extra||0);
+  if(sd.type === 'reps') return sd.value||0;
+  if(sd.type === 'load') return convertWeight(sd.value, sd.unit||'lb', 'lb');
+  return null;
+}
+
+//=========================================================
+// AUDIO + WAKE LOCK
+//=========================================================
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+  }
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function beep(freq=800, dur=0.15, type='sine', vol=0.3){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur);
+}
+function beepLow(){ beep(440, 0.12) }
+function beepHigh(){ beep(1000, 0.18, 'square', 0.35) }
+function beepEnd(){ beep(660,0.1); setTimeout(()=>beep(880,0.1),120); setTimeout(()=>beep(1320,0.3),240); }
+
+let wakeLock = null;
+async function requestWakeLock(){
+  try{ if('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }catch(e){}
+}
+function releaseWakeLock(){
+  try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && timerInst && timerInst.running) requestWakeLock();
+});
+
+//=========================================================
+// TABS
+//=========================================================
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.id === 'tab-'+name));
+  document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('active', b.dataset.tab === name));
+  if(name==='wod') renderWod();
+  if(name==='timer') renderTimer();
+  if(name==='lifting') renderLift();
+  if(name==='analysis') renderAnalysis();
+  if(name==='settings') renderSettings();
+}
+document.querySelectorAll('#tabbar button').forEach(b=>{
+  b.addEventListener('click', ()=>{ ensureAudio(); switchTab(b.dataset.tab); });
+});
+
+//=========================================================
+// THEME
+//=========================================================
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', S.settings.theme);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', S.settings.theme==='dark'?'#1B2A4A':'#F5F7FA');
+  document.getElementById('themeToggle').textContent = S.settings.theme === 'dark' ? '🌙' : '☀️';
+}
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  S.settings.theme = S.settings.theme==='dark'?'light':'dark';
+  saveState(); applyTheme();
+});
+
+//=========================================================
+// MODAL & TOAST
+//=========================================================
+function showModal(html){
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+document.getElementById('modalBg').addEventListener('click', e=>{
+  if(e.target.id === 'modalBg') closeModal();
+});
+
+let toastT;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>el.classList.remove('show'), 1800);
+}
+
+function bindOptRow(id){
+  const r = document.getElementById(id); if(!r) return;
+  r.querySelectorAll('.opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      r.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+      o.classList.add('active');
+    });
+  });
+}
+function readOpt(id){ return document.querySelector(`#${id} .opt.active`)?.dataset.v; }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;') }
+
+//=========================================================
+// WOD TAB
+//=========================================================
+let wodPill = 'benchmark';
+
+document.querySelectorAll('[data-wpill]').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-wpill]').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    wodPill = p.dataset.wpill;
+    renderWod();
+  });
+});
+
+function renderWod(){
+  const a = document.getElementById('wodArea');
+  if(wodPill === 'log'){ a.innerHTML = renderWodLogTab(); bindWodLogForm(); updateScoreInputs(); }
+  else if(wodPill === 'benchmark') a.innerHTML = renderBenchmarkTab();
+  else if(wodPill === 'custom') a.innerHTML = renderCustomTab();
+}
+
+function renderWodLogTab(){
+  const u = S.settings.unit;
+  const all = S.wodLogs.filter(w=>w.category!=='system').sort((a,b)=>b.date.localeCompare(a.date));
+  const allNames = [
+    ...HERO_WODS.map(w=>w.n),
+    ...GIRL_WODS.map(w=>w.n),
+    ...NOTABLE_WODS.map(w=>w.n),
+    ...SIG_PRESETS.map(w=>w.n),
+    ...S.customWods.filter(w=>w.name!=='(BW Log)').map(w=>w.name),
+  ];
+  return `
+    <div class="card">
+      <h2>📝 Log a WOD</h2>
+      <div class="form-row">
+        <label>WOD Name</label>
+        <input list="wodOpts" id="wd_name" placeholder="Type or pick from Benchmark/Custom" oninput="onWodNameChange()">
+        <datalist id="wodOpts">${allNames.map(n=>`<option value="${escapeAttr(n)}">`).join('')}</datalist>
+        <div class="muted" id="wd_typeHint" style="margin-top:4px"></div>
+      </div>
+      <div class="form-row">
+        <label>Date</label><input type="date" id="wd_date" value="${today()}">
+      </div>
+
+      <div id="scoreTypeArea">
+        <div class="form-row" data-stype="time">
+          <label>Time (hh:mm:ss)</label>
+          <div class="grid3">
+            <input type="number" id="sc_h" placeholder="hh" min="0">
+            <input type="number" id="sc_m" placeholder="mm" min="0" max="59">
+            <input type="number" id="sc_s" placeholder="ss" min="0" max="59">
+          </div>
+        </div>
+        <div class="form-row" data-stype="amrap" hidden>
+          <label>Rounds + Extra Reps</label>
+          <div class="grid2">
+            <input type="number" id="sc_rounds" placeholder="Rounds" min="0">
+            <input type="number" id="sc_extra" placeholder="Extra reps" min="0">
+          </div>
+        </div>
+        <div class="form-row" data-stype="reps" hidden>
+          <label>Total Reps</label>
+          <input type="number" id="sc_reps" placeholder="Total reps" min="0">
+        </div>
+        <div class="form-row" data-stype="load" hidden>
+          <label>Load (${u})</label>
+          <input type="number" id="sc_load" step="0.5" placeholder="Weight" min="0">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Rx Status</label>
+        <div class="opt-row" id="wd_rx">
+          <div class="opt active" data-v="Rx">Rx</div>
+          <div class="opt" data-v="Scaled">Scaled</div>
+          <div class="opt" data-v="Modified">Modified</div>
+        </div>
+      </div>
+      <div class="form-row" id="partnerSection" hidden>
+        <label>Partner / Team</label>
+        <div class="opt-row" id="wd_partner">
+          <div class="opt active" data-v="0">Solo</div>
+          <div class="opt" data-v="1">Partner</div>
+        </div>
+      </div>
+      <div class="form-row grid2">
+        <div><label>Body Weight (${u})</label><input type="number" step="0.1" id="wd_bw" placeholder="—"></div>
+        <div><label>Sleep (1–12 h)</label><input type="number" step="0.5" min="1" max="12" id="wd_sleep" placeholder="—"></div>
+      </div>
+      <div class="form-row">
+        <label>Temperature</label>
+        <div class="opt-row" id="wd_temp">
+          ${TEMP_OPTS.map((w,i)=>`<div class="opt${i===1?' active':''}" data-v="${w.v}">${w.l} ${w.v}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Humidity</label>
+        <div class="opt-row" id="wd_hum">
+          ${HUMIDITY_OPTS.map((w,i)=>`<div class="opt${i===1?' active':''}" data-v="${w.v}">${w.l} ${w.v}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Energy Level (1=low · 5=peak)</label>
+        <div class="opt-row" id="wd_energy">${[1,2,3,4,5].map(n=>`<div class="opt${n===3?' active':''}" data-v="${n}">${n}</div>`).join('')}</div>
+      </div>
+      <div class="form-row">
+        <label>Notes</label>
+        <textarea id="wd_notes" placeholder="Conditioning, scaling, etc"></textarea>
+      </div>
+      <div id="prevPreview" class="card" style="background:var(--card2);margin-bottom:12px"><div class="muted">Type a WOD name to see your previous PR</div></div>
+      <button class="btn primary full lg" onclick="saveWodFromInline()">Save WOD</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat"><div class="v">${all.length}</div><div class="l">Total Logs</div></div>
+      <div class="stat"><div class="v">${new Set(all.map(r=>r.wodName)).size}</div><div class="l">Unique WODs</div></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 All Records (${all.length})</h2>
+      ${all.length === 0 ? '<div class="empty">No records yet — fill the form above to save your first WOD</div>' :
+        all.map(r=>renderWodRecordRow(r)).join('')
+      }
+    </div>
+  `;
+}
+
+function renderWodRecordRow(r){
+  const cls = r.rxStatus === 'Rx' ? 'rx' : r.rxStatus === 'Scaled' ? 'scaled' : 'modified';
+  const metaParts = [fmtDate(r.date)];
+  if(r.partner) metaParts.push('Partner');
+  if(r.temperature){
+    const t = TEMP_OPTS.find(x=>x.v===r.temperature);
+    if(t) metaParts.push(`${t.l} ${r.temperature}`);
+  }
+  if(r.humidity){
+    const h = HUMIDITY_OPTS.find(x=>x.v===r.humidity);
+    if(h) metaParts.push(`${h.l} ${r.humidity}`);
+  }
+  if(r.energy) metaParts.push('⚡'+r.energy);
+  if(r.sleep) metaParts.push('😴 '+r.sleep+'h');
+  if(r.bodyWeight) metaParts.push('BW '+dispWeight(r.bodyWeight, r.bodyWeightUnit||'lb'));
+  if(r.notes) metaParts.push(escapeHtml(r.notes));
+  const scoreDisplay = r.scoreData ? formatScoreData(r.scoreData) : (r.score||'—');
+  return `<div class="record-item">
+    <div class="lhs">
+      <div class="name">${escapeHtml(r.wodName)} <span class="chip ${cls}">${r.rxStatus}</span></div>
+      <div class="meta">${metaParts.join(' · ')}</div>
+    </div>
+    <div class="val">${escapeHtml(scoreDisplay)}</div>
+    <button class="btn sm danger" style="margin-left:6px" onclick="delWod('${r.id}')">×</button>
+  </div>`;
+}
+
+function bindWodLogForm(){
+  bindOptRow('wd_rx');
+  bindOptRow('wd_partner');
+  bindOptRow('wd_temp');
+  bindOptRow('wd_hum');
+  bindOptRow('wd_energy');
+}
+
+function onWodNameChange(){
+  updateScoreInputs();
+  updatePrevPreview();
+}
+
+function updateScoreInputs(){
+  const nameInp = document.getElementById('wd_name');
+  if(!nameInp) return;
+  const name = nameInp.value.trim();
+  const wod = findAnyWodByName(name);
+  const stype = classifyScoreType(wod?.t || '', wod);
+  document.querySelectorAll('#scoreTypeArea > [data-stype]').forEach(el=>{
+    el.hidden = el.dataset.stype !== stype;
+  });
+  const hint = document.getElementById('wd_typeHint');
+  if(hint){
+    if(wod) hint.textContent = `Type: ${wod.t} · Score format: ${stype}`;
+    else hint.textContent = `Score format: ${stype} (default)`;
+  }
+  const partnerSect = document.getElementById('partnerSection');
+  if(partnerSect) partnerSect.hidden = !isPartnerWod(wod);
+}
+
+function updatePrevPreview(){
+  const name = document.getElementById('wd_name').value.trim();
+  const el = document.getElementById('prevPreview');
+  if(!el) return;
+  if(!name){ el.innerHTML = '<div class="muted">Type a WOD name to see previous attempts</div>'; return; }
+  const prev = S.wodLogs.filter(r=>r.wodName===name).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!prev.length){ el.innerHTML = '<div class="muted">🆕 No previous record — this is a PR by default!</div>'; return; }
+  // PR: best by scoreData if all comparable
+  let prRec = null;
+  let prVal = -Infinity;
+  prev.forEach(r=>{
+    const v = scoreCompareValue(r.scoreData);
+    if(v != null && v > prVal){ prVal = v; prRec = r; }
+  });
+  const lastN = prev.slice(0, Math.min(5, prev.length));
+  el.innerHTML = `
+    <div class="muted" style="margin-bottom:6px">📜 Previous attempts (most recent first):</div>
+    ${prRec ? `<div class="record-item" style="background:var(--card)">
+      <div class="lhs"><div class="name">🏆 PR: ${escapeHtml(formatScoreData(prRec.scoreData))} <span class="chip pr">PR</span></div><div class="meta">${fmtDate(prRec.date)}</div></div>
+    </div>` : ''}
+    ${lastN.map(r=>{
+      const cls = r.rxStatus === 'Rx' ? 'rx' : r.rxStatus === 'Scaled' ? 'scaled' : 'modified';
+      const sd = r.scoreData ? formatScoreData(r.scoreData) : (r.score||'—');
+      return `<div class="record-item">
+        <div class="lhs"><div class="name">${escapeHtml(sd)} <span class="chip ${cls}">${r.rxStatus}</span></div><div class="meta">${fmtDate(r.date)}${r.notes?' · '+escapeHtml(r.notes):''}</div></div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function renderBenchmarkTab(){
+  return `
+    <div class="card">
+      <h2>🦸 Hero WODs (${HERO_WODS.length})</h2>
+      <div class="wod-grid">
+        ${HERO_WODS.map(w=>{
+          const cnt = S.wodLogs.filter(r=>r.wodName===w.n).length;
+          return `<div class="wod-tile" onclick="openWodDetail('hero','${escapeAttr(w.n)}')">${escapeHtml(w.n)}<span class="badge">${escapeHtml(w.t)}</span>${cnt?`<span class="cnt">${cnt}× logged</span>`:''}</div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h2>👯 Girls Name WODs (${GIRL_WODS.length})</h2>
+      <div class="wod-grid">
+        ${GIRL_WODS.map(w=>{
+          const cnt = S.wodLogs.filter(r=>r.wodName===w.n).length;
+          return `<div class="wod-tile" onclick="openWodDetail('girl','${escapeAttr(w.n)}')">${escapeHtml(w.n)}<span class="badge">${escapeHtml(w.t)}</span>${cnt?`<span class="cnt">${cnt}× logged</span>`:''}</div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h2>🔥 Notable WODs (${NOTABLE_WODS.length})</h2>
+      <div class="wod-grid">
+        ${NOTABLE_WODS.map(w=>{
+          const cnt = S.wodLogs.filter(r=>r.wodName===w.n).length;
+          return `<div class="wod-tile" onclick="openWodDetail('notable','${escapeAttr(w.n)}')">${escapeHtml(w.n)}<span class="badge">${escapeHtml(w.t)}</span>${cnt?`<span class="cnt">${cnt}× logged</span>`:''}</div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderCustomTab(){
+  return `
+    <button class="btn primary full lg" onclick="openCustomWodForm()" style="margin-bottom:14px">+ Create Custom WOD</button>
+    <div class="card">
+      <h2>⭐ Signature WODs</h2>
+      <div class="wod-grid">
+        ${SIG_PRESETS.map(w=>{
+          const cnt = S.wodLogs.filter(r=>r.wodName===w.n).length;
+          return `<div class="wod-tile" onclick="openWodDetail('sig','${escapeAttr(w.n)}')">${escapeHtml(w.n)}<span class="badge">${escapeHtml(w.t)}</span>${cnt?`<span class="cnt">${cnt}× logged</span>`:''}</div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h2>📋 My Custom WODs (${S.customWods.length})</h2>
+      ${S.customWods.length === 0 ? '<div class="empty">No custom WODs — tap the button above</div>' :
+        `<div class="wod-grid">
+          ${S.customWods.map(w=>{
+            const cnt = S.wodLogs.filter(r=>r.wodName===w.name).length;
+            return `<div class="wod-tile" onclick="openWodDetail('custom','${w.id}')">${escapeHtml(w.name)}<span class="badge">${escapeHtml(w.type||'Custom')}</span>${cnt?`<span class="cnt">${cnt}× logged</span>`:''}</div>`;
+          }).join('')}
+        </div>`}
+    </div>
+  `;
+}
+
+function findWod(cat, id){
+  if(cat === 'hero') return {...HERO_WODS.find(w=>w.n===id), cat};
+  if(cat === 'girl') return {...GIRL_WODS.find(w=>w.n===id), cat};
+  if(cat === 'notable') return {...NOTABLE_WODS.find(w=>w.n===id), cat};
+  if(cat === 'sig') return {...SIG_PRESETS.find(w=>w.n===id), cat};
+  if(cat === 'custom'){
+    const c = S.customWods.find(w=>w.id===id);
+    return c ? {n:c.name, t:c.type, d:c.description, id:c.id, cat} : null;
+  }
+  return null;
+}
+
+function openWodDetail(cat, id){
+  const w = findWod(cat, id);
+  if(!w){ toast('WOD not found'); return; }
+  const records = S.wodLogs.filter(r=>r.wodName === w.n).sort((a,b)=>b.date.localeCompare(a.date));
+  const recHtml = records.length ? records.map(r=>{
+    const cls = r.rxStatus === 'Rx' ? 'rx' : r.rxStatus === 'Scaled' ? 'scaled' : 'modified';
+    const sd = r.scoreData ? formatScoreData(r.scoreData) : (r.score||'—');
+    return `<div class="record-item">
+      <div class="lhs">
+        <div class="name">${escapeHtml(sd)} <span class="chip ${cls}">${r.rxStatus}</span></div>
+        <div class="meta">${fmtDate(r.date)}${r.partner?' · Partner':''}${r.notes?' · '+escapeHtml(r.notes):''}</div>
+      </div>
+      <button class="btn sm danger" onclick="event.stopPropagation();delWod('${r.id}')">×</button>
+    </div>`;
+  }).join('') : '<div class="empty">No records yet</div>';
+
+  showModal(`
+    <h2>${escapeHtml(w.n)} <button class="close" onclick="closeModal()">✕</button></h2>
+    <div class="card">
+      <div class="muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${escapeHtml(w.t)}</div>
+      <div style="white-space:pre-wrap;color:var(--text2);line-height:1.6">${escapeHtml(w.d)}</div>
+    </div>
+    <button class="btn primary full" onclick="useInLog('${escapeAttr(w.n)}')">Use in Log Form</button>
+    ${cat==='custom'?`
+      <button class="btn full" style="margin-top:8px" onclick="editCustomWod('${w.id}')">Edit</button>
+      <button class="btn full danger" style="margin-top:8px" onclick="delCustomWod('${w.id}')">Delete</button>`:''}
+    <h3 style="margin-top:18px">Previous Records (${records.length})</h3>
+    ${recHtml}
+  `);
+}
+
+function useInLog(name){
+  closeModal();
+  wodPill = 'log';
+  document.querySelectorAll('[data-wpill]').forEach(x=>x.classList.toggle('active', x.dataset.wpill==='log'));
+  switchTab('wod');
+  setTimeout(()=>{
+    const inp = document.getElementById('wd_name');
+    if(inp){ inp.value = name; updateScoreInputs(); updatePrevPreview(); inp.focus(); }
+  }, 50);
+}
+
+function saveWodFromInline(){
+  const date = document.getElementById('wd_date').value;
+  const name = document.getElementById('wd_name').value.trim();
+  if(!name){ toast('Enter WOD name'); return; }
+  const wod = findAnyWodByName(name);
+  const stype = classifyScoreType(wod?.t || '', wod);
+  const sc = buildScoreFromForm(stype);
+  if(!sc){ toast('Enter a valid score'); return; }
+  const rxStatus = readOpt('wd_rx');
+  const partnerToggle = readOpt('wd_partner');
+  const partner = isPartnerWod(wod) && partnerToggle === '1';
+  const bwRaw = parseFloat(document.getElementById('wd_bw').value);
+  const bodyWeight = isNaN(bwRaw) ? null : bwRaw;
+  const sleepRaw = parseFloat(document.getElementById('wd_sleep').value);
+  const sleep = isNaN(sleepRaw) ? null : sleepRaw;
+  const temperature = readOpt('wd_temp');
+  const humidity = readOpt('wd_hum');
+  const energy = parseInt(readOpt('wd_energy'));
+  const notes = document.getElementById('wd_notes').value.trim();
+
+  let category = 'custom';
+  if(HERO_WODS.find(w=>w.n===name)) category = 'hero';
+  else if(GIRL_WODS.find(w=>w.n===name)) category = 'girl';
+  else if(NOTABLE_WODS.find(w=>w.n===name)) category = 'notable';
+  else if(SIG_PRESETS.find(w=>w.n===name)) category = 'sig';
+
+  const prevSame = S.wodLogs.filter(r=>r.wodName===name);
+  const prevBest = prevSame.reduce((best,r)=>{
+    const v = scoreCompareValue(r.scoreData);
+    return (v != null && v > best) ? v : best;
+  }, -Infinity);
+  const newVal = scoreCompareValue(sc.scoreData);
+  const isPr = newVal != null && newVal > prevBest;
+  const isFirst = prevSame.length === 0;
+
+  S.wodLogs.push({
+    id:uid(), date, wodName:name,
+    score:sc.display, scoreData:sc.scoreData,
+    rxStatus, partner, notes, category,
+    bodyWeight, bodyWeightUnit:S.settings.unit,
+    sleep, temperature, humidity, energy
+  });
+  saveState();
+  toast(isFirst ? '🎉 First record!' : (isPr ? '🏆 New PR!' : 'Saved!'));
+  renderWod();
+}
+
+function delWod(id){
+  if(!confirm('Delete this record?')) return;
+  S.wodLogs = S.wodLogs.filter(w=>w.id !== id);
+  saveState(); closeModal(); toast('Deleted'); renderWod();
+}
+
+function openCustomWodForm(existing){
+  const e = existing || {};
+  showModal(`
+    <h2>${e.id?'Edit':'New'} Custom WOD <button class="close" onclick="closeModal()">✕</button></h2>
+    <div class="form-row"><label>Name</label><input id="cw_name" value="${e.name?escapeAttr(e.name):''}" placeholder="e.g. Box Blast"></div>
+    <div class="form-row"><label>Type</label><input id="cw_type" value="${e.type?escapeAttr(e.type):''}" placeholder="e.g. 5 RFT, 12 min AMRAP"></div>
+    <div class="form-row"><label>Score Type</label>
+      <select id="cw_stype">
+        <option value="">Auto-detect from type</option>
+        <option value="time"${e.scoreType==='time'?' selected':''}>Time (mm:ss)</option>
+        <option value="amrap"${e.scoreType==='amrap'?' selected':''}>AMRAP (rounds+reps)</option>
+        <option value="reps"${e.scoreType==='reps'?' selected':''}>Total Reps</option>
+        <option value="load"${e.scoreType==='load'?' selected':''}>Load (kg/lb)</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Description</label><textarea id="cw_desc" rows="6">${e.description?escapeHtml(e.description):''}</textarea></div>
+    <button class="btn primary full lg" onclick="saveCustomWod('${e.id||''}')">${e.id?'Update':'Save'}</button>
+  `);
+}
+function editCustomWod(id){
+  const w = S.customWods.find(x=>x.id===id);
+  if(w) openCustomWodForm(w);
+}
+function saveCustomWod(id){
+  const name = document.getElementById('cw_name').value.trim();
+  const type = document.getElementById('cw_type').value.trim();
+  const scoreType = document.getElementById('cw_stype').value || null;
+  const desc = document.getElementById('cw_desc').value.trim();
+  if(!name){ toast('Enter a name'); return; }
+  if(id){
+    const idx = S.customWods.findIndex(x=>x.id===id);
+    if(idx>=0) S.customWods[idx] = {...S.customWods[idx], name, type, description:desc, scoreType};
+  } else {
+    S.customWods.push({id:uid(), name, type, description:desc, scoreType});
+  }
+  saveState(); closeModal(); toast('Saved!'); renderWod();
+}
+function delCustomWod(id){
+  if(!confirm('Delete this custom WOD?')) return;
+  S.customWods = S.customWods.filter(w=>w.id !== id);
+  saveState(); closeModal(); toast('Deleted'); renderWod();
+}
+
+//=========================================================
+// TIMER TAB
+//=========================================================
+let timerGroup = 'stopwatch';
+let timerMode = 'stopwatch';
+let timerInst = null;
+
+document.querySelectorAll('#timerPills .pill').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    if(timerInst){ timerInst.stop(); timerInst = null; }
+    document.querySelectorAll('#timerPills .pill').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    timerGroup = p.dataset.tgroup;
+    if(timerGroup === 'stopwatch') timerMode = 'stopwatch';
+    else if(timerGroup === 'metronome') timerMode = 'metronome';
+    else timerMode = null; // show card grid
+    renderTimer();
+  });
+});
+
+function pickTimerMode(mode){
+  if(timerInst){ timerInst.stop(); timerInst = null; }
+  timerMode = mode;
+  renderTimer();
+}
+function backToTimerGrid(){
+  if(timerInst){ timerInst.stop(); timerInst = null; }
+  timerMode = null;
+  renderTimer();
+}
+
+function renderTimer(){
+  const a = document.getElementById('timerArea');
+  if(timerGroup === 'timer' && !timerMode){
+    a.innerHTML = `
+      <div class="card">
+        <h2>⏲️ Pick a Timer</h2>
+        <div class="muted" style="margin-bottom:10px">Choose a workout timer mode.</div>
+        <div class="wod-grid">
+          <div class="wod-tile" onclick="pickTimerMode('fortime')">For Time<span class="badge">Count Up · Cap</span></div>
+          <div class="wod-tile" onclick="pickTimerMode('amrap')">AMRAP<span class="badge">Count Down · Counter</span></div>
+          <div class="wod-tile" onclick="pickTimerMode('emom')">EMOM<span class="badge">Every Minute</span></div>
+          <div class="wod-tile" onclick="pickTimerMode('tabata')">Tabata<span class="badge">8R 20/10</span></div>
+          <div class="wod-tile" onclick="pickTimerMode('interval')">Interval<span class="badge">Work / Rest</span></div>
+        </div>
+      </div>`;
+    return;
+  }
+  const showBack = timerGroup === 'timer' && timerMode;
+  const back = showBack ? `<button class="btn sm" onclick="backToTimerGrid()" style="margin-bottom:10px">← Back to Timers</button>` : '';
+  if(timerMode === 'stopwatch'){
+    a.innerHTML = `
+      ${back}
+      <div class="timer-display">
+        <div class="timer-big" id="td">00:00.00</div>
+        <div class="timer-sub">Stopwatch</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary lg" id="t_start">Start</button>
+        <button class="btn lg" id="t_lap">Lap</button>
+        <button class="btn danger lg" id="t_reset">Reset</button>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Laps</h3>
+        <div id="lapList" class="muted">None</div>
+      </div>`;
+    timerInst = new StopwatchTimer(); timerInst.bind();
+  }
+  else if(timerMode === 'fortime'){
+    a.innerHTML = `
+      ${back}
+      <div class="card">
+        <h3>For Time (Count Up)</h3>
+        <div class="form-row"><label>Time Cap (min, 0=none)</label><input type="number" id="ft_cap" value="0" min="0"></div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-big" id="td">00:00.00</div>
+        <div class="timer-sub">For Time</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary lg" id="t_start">Start</button>
+        <button class="btn danger lg" id="t_reset">Reset</button>
+      </div>`;
+    timerInst = new ForTimeTimer(); timerInst.bind();
+  }
+  else if(timerMode === 'emom'){
+    a.innerHTML = `
+      ${back}
+      <div class="card">
+        <h3>EMOM</h3>
+        <div class="form-row grid2">
+          <div><label>Rounds</label><input type="number" id="em_r" value="10" min="1"></div>
+          <div><label>Interval (s)</label><input type="number" id="em_s" value="60" min="5"></div>
+        </div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-big" id="td">00:00</div>
+        <div class="timer-sub" id="tsub">Round 0/0</div>
+        <div class="timer-status" id="ts">Idle</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary lg" id="t_start">Start</button>
+        <button class="btn danger lg" id="t_reset">Reset</button>
+      </div>`;
+    timerInst = new EmomTimer(); timerInst.bind();
+  }
+  else if(timerMode === 'tabata'){
+    a.innerHTML = `
+      ${back}
+      <div class="card">
+        <h3>Tabata</h3>
+        <div class="form-row grid3">
+          <div><label>Work (s)</label><input type="number" id="tb_w" value="20"></div>
+          <div><label>Rest (s)</label><input type="number" id="tb_r" value="10"></div>
+          <div><label>Rounds</label><input type="number" id="tb_n" value="8"></div>
+        </div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-big" id="td">00:20</div>
+        <div class="timer-sub" id="tsub">Round 0/0</div>
+        <div class="timer-status" id="ts">Idle</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary lg" id="t_start">Start</button>
+        <button class="btn danger lg" id="t_reset">Reset</button>
+      </div>`;
+    timerInst = new IntervalTimer({tabata:true}); timerInst.bind();
+  }
+  else if(timerMode === 'amrap'){
+    a.innerHTML = `
+      ${back}
+      <div class="card">
+        <h3>AMRAP (Count Down)</h3>
+        <div class="form-row"><label>Duration (min)</label><input type="number" id="am_min" value="20" min="1"></div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-big" id="td">20:00</div>
+        <div class="timer-sub">AMRAP</div>
+        <div class="timer-status" id="ts">Idle</div>
+      </div>
+      <div class="card">
+        <h3>Round Counter</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <button class="btn lg" id="am_minus">−</button>
+          <div style="font-size:42px;font-weight:900;color:var(--gold)" id="am_count">0</div>
+          <button class="btn primary lg" id="am_plus">+</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary lg" id="t_start">Start</button>
+        <button class="btn danger lg" id="t_reset">Reset</button>
+      </div>`;
+    timerInst = new AmrapTimer(); timerInst.bind();
+  }
+  else if(timerMode === 'interval'){
+    a.innerHTML = `
+      ${back}
+      <div class="card">
+        <h3>Interval</h3>
+        <div class="form-row grid3">
+          <div><label>Work (s)</label><input type="number" id="iv_w" value="60"></div>
+          <div><label>Rest (s)</label><input type="number" id="iv_r" value="30"></div>
+          <div><label>Rounds</label><input type="number" id="iv_n" value="5"></div>
+        </div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-big" id="td">01:00</div>
+        <div class="timer-sub" id="tsub">Round 0/0</div>
+        <div class="timer-status" id="ts">Idle</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary lg" id="t_start">Start</button>
+        <button class="btn danger lg" id="t_reset">Reset</button>
+      </div>`;
+    timerInst = new IntervalTimer({}); timerInst.bind();
+  }
+  else if(timerMode === 'metronome'){
+    a.innerHTML = `
+      <div class="card">
+        <h3>🥁 Metronome</h3>
+        <div class="muted" style="margin-bottom:8px">For pacing-based movements like running cadence (180 BPM ideal) and Double-Unders rhythm. Tap or drag to adjust BPM.</div>
+        <div class="form-row"><label>BPM (40–240)</label><input type="number" id="met_bpm" value="180" min="40" max="240">
+          <div class="muted" style="margin-top:4px">달리기 케이던스(180 BPM 권장)나 더블언더 같이 박자가 중요한 운동에 활용하세요. 탭하거나 드래그해서 BPM을 조절합니다.</div>
+        </div>
+        <div class="form-row">
+          <label>Presets</label>
+          <div class="opt-row">
+            <div class="opt" data-met-preset="90">90 (Squat tempo)</div>
+            <div class="opt" data-met-preset="140">140 (Double-Unders)</div>
+            <div class="opt" data-met-preset="160">160 (Run base)</div>
+            <div class="opt" data-met-preset="180">180 (Run cadence)</div>
+          </div>
+        </div>
+      </div>
+      <div class="timer-display">
+        <div class="met-dot" id="met_dot"></div>
+        <div class="timer-big" id="td" style="font-size:36px">— BPM</div>
+        <div class="timer-sub" id="tsub">Beat 0</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary lg" id="t_start">Start</button>
+        <button class="btn danger lg" id="t_reset">Stop</button>
+      </div>`;
+    timerInst = new Metronome(); timerInst.bind();
+  }
+}
+
+class StopwatchTimer {
+  constructor(){ this.ms=0; this.running=false; this.laps=[]; this.last=0; }
+  bind(){
+    document.getElementById('t_start').addEventListener('click', ()=>this.toggle());
+    document.getElementById('t_lap').addEventListener('click', ()=>this.lap());
+    document.getElementById('t_reset').addEventListener('click', ()=>this.reset());
+  }
+  toggle(){ ensureAudio(); if(this.running){this.stop();document.getElementById('t_start').textContent='Start';} else {this.start();document.getElementById('t_start').textContent='Stop';} }
+  start(){
+    this.running=true; this.last=performance.now(); requestWakeLock(); beepHigh();
+    const tick=()=>{ if(!this.running) return; const now=performance.now(); this.ms+=now-this.last; this.last=now; document.getElementById('td').textContent=fmtTimeMs(this.ms); this.raf=requestAnimationFrame(tick); };
+    tick();
+  }
+  stop(){ this.running=false; cancelAnimationFrame(this.raf); releaseWakeLock(); }
+  lap(){
+    if(!this.running) return;
+    this.laps.push(this.ms);
+    document.getElementById('lapList').innerHTML = this.laps.map((m,i,a)=>{
+      const split = i===0?m:m-a[i-1];
+      return `<div class="record-item"><div class="lhs"><div class="name">Lap ${i+1}</div><div class="meta">Split ${fmtTimeMs(split)}</div></div><div class="val">${fmtTimeMs(m)}</div></div>`;
+    }).reverse().join('') || 'None';
+    beepLow();
+  }
+  reset(){ this.stop(); this.ms=0; this.laps=[]; document.getElementById('td').textContent='00:00.00'; document.getElementById('lapList').innerHTML='None'; document.getElementById('t_start').textContent='Start'; }
+}
+
+class ForTimeTimer {
+  constructor(){ this.ms=0; this.running=false; this.cap=0 }
+  bind(){
+    document.getElementById('t_start').addEventListener('click', ()=>this.toggle());
+    document.getElementById('t_reset').addEventListener('click', ()=>this.reset());
+  }
+  toggle(){ ensureAudio(); if(this.running){this.stop();document.getElementById('t_start').textContent='Start';} else { this.cap=Math.max(0,parseInt(document.getElementById('ft_cap').value)||0)*60*1000; this.start(); document.getElementById('t_start').textContent='Stop'; } }
+  start(){
+    this.running=true; this.last=performance.now(); requestWakeLock(); beepHigh();
+    const tick=()=>{ if(!this.running) return; const now=performance.now(); this.ms+=now-this.last; this.last=now; document.getElementById('td').textContent=fmtTimeMs(this.ms); if(this.cap>0 && this.ms>=this.cap){beepEnd();this.stop();document.getElementById('t_start').textContent='Start';return;} this.raf=requestAnimationFrame(tick); };
+    tick();
+  }
+  stop(){ this.running=false; cancelAnimationFrame(this.raf); releaseWakeLock(); }
+  reset(){ this.stop(); this.ms=0; document.getElementById('td').textContent='00:00.00'; document.getElementById('t_start').textContent='Start'; }
+}
+
+class EmomTimer {
+  constructor(){ this.running=false; this.round=0; this.total=0; this.intvl=60; this.elapsed=0; }
+  bind(){
+    document.getElementById('t_start').addEventListener('click', ()=>this.toggle());
+    document.getElementById('t_reset').addEventListener('click', ()=>this.reset());
+  }
+  toggle(){ ensureAudio(); if(this.running){this.stop();document.getElementById('t_start').textContent='Resume';} else { if(this.round===0){this.total=parseInt(document.getElementById('em_r').value)||10;this.intvl=parseInt(document.getElementById('em_s').value)||60;this.round=1;this.elapsed=0;} this.start(); document.getElementById('t_start').textContent='Stop'; } }
+  start(){
+    this.running=true; this.last=performance.now(); requestWakeLock(); beepHigh();
+    document.getElementById('ts').textContent='Working'; document.getElementById('ts').className='timer-status work';
+    document.getElementById('tsub').textContent=`Round ${this.round}/${this.total}`;
+    let lastSec=-1;
+    const tick=()=>{
+      if(!this.running) return;
+      const now=performance.now(); this.elapsed+=(now-this.last)/1000; this.last=now;
+      if(this.elapsed>=this.intvl){
+        this.elapsed=0; this.round++; beepHigh();
+        if(this.round>this.total){ this.stop(); document.getElementById('td').textContent='00:00'; document.getElementById('ts').textContent='Done'; document.getElementById('ts').className='timer-status'; beepEnd(); document.getElementById('t_start').textContent='Start'; this.round=0; return; }
+        document.getElementById('tsub').textContent=`Round ${this.round}/${this.total}`;
+      }
+      const remain=this.intvl-this.elapsed;
+      document.getElementById('td').textContent=fmtTime(remain);
+      const sec=Math.ceil(remain);
+      if(sec!==lastSec){ if(sec<=3 && sec>0) beepLow(); lastSec=sec; }
+      this.raf=requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  stop(){ this.running=false; cancelAnimationFrame(this.raf); releaseWakeLock(); }
+  reset(){ this.stop(); this.round=0; this.elapsed=0; document.getElementById('td').textContent='00:00'; document.getElementById('tsub').textContent='Round 0/0'; document.getElementById('ts').textContent='Idle'; document.getElementById('ts').className='timer-status'; document.getElementById('t_start').textContent='Start'; }
+}
+
+class IntervalTimer {
+  constructor(opts){ this.opts=opts; this.running=false; this.round=0; this.total=0; this.work=0; this.rest=0; this.elapsed=0; this.phase='work'; }
+  bind(){
+    document.getElementById('t_start').addEventListener('click', ()=>this.toggle());
+    document.getElementById('t_reset').addEventListener('click', ()=>this.reset());
+  }
+  loadSettings(){
+    if(this.opts.tabata){ this.work=parseInt(document.getElementById('tb_w').value)||20; this.rest=parseInt(document.getElementById('tb_r').value)||10; this.total=parseInt(document.getElementById('tb_n').value)||8; }
+    else { this.work=parseInt(document.getElementById('iv_w').value)||60; this.rest=parseInt(document.getElementById('iv_r').value)||30; this.total=parseInt(document.getElementById('iv_n').value)||5; }
+  }
+  toggle(){ ensureAudio(); if(this.running){this.stop();document.getElementById('t_start').textContent='Resume';} else { if(this.round===0){this.loadSettings();this.round=1;this.phase='work';this.elapsed=0;} this.start();document.getElementById('t_start').textContent='Stop'; } }
+  start(){
+    this.running=true; this.last=performance.now(); requestWakeLock(); beepHigh();
+    let lastSec=-1;
+    const updateUi=()=>{ document.getElementById('tsub').textContent=`Round ${this.round}/${this.total} · ${this.phase==='work'?'WORK':'REST'}`; document.getElementById('ts').textContent=this.phase==='work'?'Work':'Rest'; document.getElementById('ts').className='timer-status '+this.phase; };
+    updateUi();
+    const tick=()=>{
+      if(!this.running) return;
+      const now=performance.now(); this.elapsed+=(now-this.last)/1000; this.last=now;
+      const dur=this.phase==='work'?this.work:this.rest;
+      if(this.elapsed>=dur){
+        this.elapsed=0;
+        if(this.phase==='work'){ if(this.rest>0){this.phase='rest';beepLow();} else {this.round++;beepHigh();} }
+        else { this.phase='work'; this.round++; beepHigh(); }
+        if(this.round>this.total){ this.stop(); document.getElementById('td').textContent='00:00'; document.getElementById('ts').textContent='Done'; document.getElementById('ts').className='timer-status'; beepEnd(); document.getElementById('t_start').textContent='Start'; this.round=0; return; }
+        updateUi();
+      }
+      const remain=(this.phase==='work'?this.work:this.rest)-this.elapsed;
+      document.getElementById('td').textContent=fmtTime(remain);
+      const sec=Math.ceil(remain);
+      if(sec!==lastSec){ if(sec<=3 && sec>0) beepLow(); lastSec=sec; }
+      this.raf=requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  stop(){ this.running=false; cancelAnimationFrame(this.raf); releaseWakeLock(); }
+  reset(){ this.stop(); this.round=0; this.elapsed=0; this.phase='work'; document.getElementById('td').textContent='00:00'; document.getElementById('tsub').textContent='Round 0/0'; document.getElementById('ts').textContent='Idle'; document.getElementById('ts').className='timer-status'; document.getElementById('t_start').textContent='Start'; }
+}
+
+class AmrapTimer {
+  constructor(){ this.remain=0; this.running=false; this.count=0; }
+  bind(){
+    document.getElementById('t_start').addEventListener('click', ()=>this.toggle());
+    document.getElementById('t_reset').addEventListener('click', ()=>this.reset());
+    document.getElementById('am_plus').addEventListener('click', ()=>{ this.count++; document.getElementById('am_count').textContent=this.count; beepLow(); });
+    document.getElementById('am_minus').addEventListener('click', ()=>{ if(this.count>0){this.count--;document.getElementById('am_count').textContent=this.count;} });
+    document.getElementById('am_min').addEventListener('change', ()=>{ if(!this.running){ document.getElementById('td').textContent=fmtTime((parseInt(document.getElementById('am_min').value)||20)*60); }});
+  }
+  toggle(){ ensureAudio(); if(this.running){this.stop();document.getElementById('t_start').textContent='Resume';} else { if(this.remain<=0) this.remain=(parseInt(document.getElementById('am_min').value)||20)*60*1000; this.start();document.getElementById('t_start').textContent='Stop'; } }
+  start(){
+    this.running=true; this.last=performance.now(); requestWakeLock(); beepHigh();
+    document.getElementById('ts').textContent='Working'; document.getElementById('ts').className='timer-status work';
+    let lastSec=Math.ceil(this.remain/1000);
+    const tick=()=>{
+      if(!this.running) return;
+      const now=performance.now(); this.remain-=now-this.last; this.last=now;
+      if(this.remain<=0){ document.getElementById('td').textContent='00:00'; document.getElementById('ts').textContent='Done'; document.getElementById('ts').className='timer-status'; beepEnd(); this.stop(); document.getElementById('t_start').textContent='Start'; this.remain=0; return; }
+      document.getElementById('td').textContent=fmtTime(this.remain/1000);
+      const sec=Math.ceil(this.remain/1000);
+      if(sec!==lastSec){ if(sec<=3 && sec>0) beepHigh(); lastSec=sec; }
+      this.raf=requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  stop(){ this.running=false; cancelAnimationFrame(this.raf); releaseWakeLock(); document.getElementById('ts').textContent='Paused'; document.getElementById('ts').className='timer-status'; }
+  reset(){
+    this.stop(); this.remain=0; this.count=0;
+    const m=parseInt(document.getElementById('am_min')?.value)||20;
+    document.getElementById('td').textContent=fmtTime(m*60);
+    document.getElementById('am_count').textContent='0';
+    document.getElementById('ts').textContent='Idle'; document.getElementById('ts').className='timer-status';
+    document.getElementById('t_start').textContent='Start';
+  }
+}
+
+class Metronome {
+  constructor(){ this.bpm=180; this.running=false; this.beat=0; this.timer=null; }
+  bind(){
+    const bpmInp = document.getElementById('met_bpm');
+    document.getElementById('t_start').addEventListener('click', ()=>this.toggle());
+    document.getElementById('t_reset').addEventListener('click', ()=>this.reset());
+    bpmInp.addEventListener('change', ()=>{
+      let v = parseInt(bpmInp.value)||180;
+      if(v<40) v=40; if(v>240) v=240;
+      bpmInp.value = v;
+      this.bpm = v;
+      document.getElementById('td').textContent = `${v} BPM`;
+      if(this.running){ this.stop(); this.start(); }
+    });
+    document.querySelectorAll('[data-met-preset]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-met-preset]').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        const v = parseInt(b.dataset.metPreset);
+        bpmInp.value = v;
+        this.bpm = v;
+        document.getElementById('td').textContent = `${v} BPM`;
+        if(this.running){ this.stop(); this.start(); }
+      });
+    });
+    this.bpm = parseInt(bpmInp.value)||180;
+    document.getElementById('td').textContent = `${this.bpm} BPM`;
+  }
+  toggle(){ ensureAudio(); if(this.running){ this.stop(); document.getElementById('t_start').textContent='Start'; } else { this.start(); document.getElementById('t_start').textContent='Stop'; } }
+  start(){
+    this.running = true; this.beat = 0;
+    requestWakeLock();
+    const interval = 60000 / this.bpm;
+    const tick = ()=>{
+      if(!this.running) return;
+      this.beat++;
+      const isOne = (this.beat % 4) === 1;
+      beep(isOne ? 1320 : 880, 0.04, 'square', isOne ? 0.4 : 0.25);
+      const dot = document.getElementById('met_dot');
+      const sub = document.getElementById('tsub');
+      if(dot){
+        dot.classList.add(isOne ? 'beat-one' : 'beat');
+        setTimeout(()=>{ if(dot){ dot.classList.remove('beat'); dot.classList.remove('beat-one'); } }, Math.min(80, interval*0.4));
+      }
+      if(sub) sub.textContent = `Beat ${((this.beat-1)%4)+1}/4 · ${this.bpm} BPM`;
+      this.timer = setTimeout(tick, interval);
+    };
+    tick();
+  }
+  stop(){
+    this.running = false;
+    clearTimeout(this.timer);
+    releaseWakeLock();
+  }
+  reset(){
+    this.stop();
+    this.beat = 0;
+    document.getElementById('t_start').textContent = 'Start';
+    const sub = document.getElementById('tsub');
+    if(sub) sub.textContent = 'Beat 0';
+  }
+}
+
+//=========================================================
+// LIFTING TAB
+//=========================================================
+let liftPill = 'lifts';
+document.querySelectorAll('[data-lpill]').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-lpill]').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    liftPill = p.dataset.lpill;
+    renderLift();
+  });
+});
+
+function renderLift(){
+  const a = document.getElementById('liftArea');
+  if(liftPill === 'lifts') a.innerHTML = renderLiftsList();
+  else if(liftPill === 'gym') a.innerHTML = renderGymList();
+  else if(liftPill === 'run') a.innerHTML = renderRunList();
+  else if(liftPill === 'calc') a.innerHTML = renderPctCalc();
+  else if(liftPill === 'bar') a.innerHTML = renderBarLoading();
+  bindLiftHandlers();
+}
+
+function bindLiftHandlers(){
+  document.querySelectorAll('[data-lift-add]').forEach(b=>b.addEventListener('click', ()=>openLiftLog(b.dataset.liftAdd)));
+  document.querySelectorAll('[data-lift-tl]').forEach(b=>b.addEventListener('click', ()=>showLiftTimeline(b.dataset.liftTl)));
+  document.querySelectorAll('[data-gym-add]').forEach(b=>b.addEventListener('click', ()=>openGymLog(b.dataset.gymAdd)));
+  document.querySelectorAll('[data-lift-del]').forEach(b=>b.addEventListener('click', ()=>{
+    if(!confirm('Delete?')) return;
+    S.liftingRecords = S.liftingRecords.filter(l=>l.id !== b.dataset.liftDel);
+    saveState(); renderLift();
+  }));
+  document.querySelectorAll('[data-gym-del]').forEach(b=>b.addEventListener('click', ()=>{
+    if(!confirm('Delete?')) return;
+    S.gymnasticsRecords = S.gymnasticsRecords.filter(l=>l.id !== b.dataset.gymDel);
+    saveState(); renderLift();
+  }));
+  document.querySelectorAll('[data-run-del]').forEach(b=>b.addEventListener('click', ()=>{
+    if(!confirm('Delete?')) return;
+    S.runningRecords = S.runningRecords.filter(l=>l.id !== b.dataset.runDel);
+    saveState(); renderLift();
+  }));
+  const calcInp=document.getElementById('calc1rm');
+  if(calcInp){ calcInp.addEventListener('input', updateLiftPct); updateLiftPct(); }
+  bindCardioM();
+  bindCardioC();
+  bindUnitConv();
+  bindCalc();
+  bindBarLoader();
+  bindRunForm();
+}
+
+function renderLiftsList(){
+  const u = S.settings.unit;
+  return LIFT_NAMES.map(L=>{
+    const recs = S.liftingRecords.filter(r=>r.lift===L.k).sort((a,b)=>b.date.localeCompare(a.date));
+    let pr = 0;
+    recs.forEach(r=>{ const v = rawToCurrent(r.weight, r.unit||'lb'); if(v > pr) pr = v; });
+    const sortedAsc = [...recs].sort((a,b)=>a.date.localeCompare(b.date));
+    let runMax = 0;
+    const enriched = sortedAsc.map(r=>{
+      const v = rawToCurrent(r.weight, r.unit||'lb');
+      const isPr = v > runMax;
+      if(isPr) runMax = v;
+      return {...r, isPr};
+    }).reverse();
+    return `
+      <div class="card">
+        <h2>${L.n} <span class="hi" style="margin-left:auto;font-size:18px">${pr?Math.round(pr*10)/10+' '+u:'—'}</span></h2>
+        <div class="btn-row">
+          <button class="btn sm primary" data-lift-add="${L.k}">+ Log PR</button>
+          <button class="btn sm" data-lift-tl="${L.k}">Timeline</button>
+        </div>
+        <div style="margin-top:8px">
+          ${enriched.length === 0 ? '<div class="empty" style="padding:8px">No records</div>' :
+            enriched.map(r=>`<div class="record-item">
+              <div class="lhs"><div class="name">${dispWeight(r.weight, r.unit||'lb')}${r.reps>1?` × ${r.reps}`:''} ${r.isPr?'<span class="chip pr">🎉 PR</span>':''}</div><div class="meta">${fmtDate(r.date)}${r.notes?' · '+escapeHtml(r.notes):''}</div></div>
+              <button class="btn sm danger" data-lift-del="${r.id}">×</button>
+            </div>`).join('')
+          }
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function showLiftTimeline(liftKey){
+  const L = LIFT_NAMES.find(x=>x.k===liftKey);
+  const recs = S.liftingRecords.filter(r=>r.lift===liftKey).sort((a,b)=>a.date.localeCompare(b.date));
+  let prs = []; let max = 0;
+  recs.forEach(r=>{
+    const v = rawToCurrent(r.weight, r.unit||'lb');
+    if(v > max){ max = v; prs.push({date:r.date, weight:v, reps:r.reps}); }
+  });
+  showModal(`
+    <h2>${L.n} PR Timeline <button class="close" onclick="closeModal()">✕</button></h2>
+    <div class="timeline">
+      ${prs.length===0 ? '<div class="empty">No PRs yet</div>' :
+        [...prs].reverse().map(p=>`<div class="timeline-item">
+          <div class="hi">${Math.round(p.weight*10)/10} ${S.settings.unit}${p.reps>1?` × ${p.reps}`:''}</div>
+          <div class="muted">${fmtDate(p.date)}</div>
+        </div>`).join('')}
+    </div>
+  `);
+}
+
+function openLiftLog(liftKey){
+  const L = LIFT_NAMES.find(x=>x.k===liftKey);
+  showModal(`
+    <h2>Log ${L.n} <button class="close" onclick="closeModal()">✕</button></h2>
+    <div class="form-row"><label>Date</label><input type="date" id="lf_date" value="${today()}"></div>
+    <div class="form-row grid2">
+      <div><label>Weight (${S.settings.unit})</label><input type="number" id="lf_w" step="0.5" placeholder="e.g. 225"></div>
+      <div><label>Reps (1 = 1RM)</label><input type="number" id="lf_r" value="1" min="1"></div>
+    </div>
+    <div class="form-row"><label>Notes</label><input id="lf_n" placeholder="e.g. New PR!"></div>
+    <button class="btn primary full lg" onclick="saveLift('${liftKey}')">Save</button>
+  `);
+}
+function saveLift(liftKey){
+  const date = document.getElementById('lf_date').value;
+  const w = parseFloat(document.getElementById('lf_w').value);
+  const r = parseInt(document.getElementById('lf_r').value)||1;
+  const notes = document.getElementById('lf_n').value.trim();
+  if(!w || w<=0){ toast('Enter weight'); return; }
+  const isPr = (() => {
+    const same = S.liftingRecords.filter(x=>x.lift===liftKey);
+    let max = 0;
+    same.forEach(x=>{ const v = rawToCurrent(x.weight, x.unit||'lb'); if(v>max) max=v; });
+    return w > max;
+  })();
+  S.liftingRecords.push({id:uid(), date, lift:liftKey, weight:w, unit:S.settings.unit, reps:r, notes});
+  saveState(); closeModal();
+  toast(isPr ? '🎉 New PR!' : 'Saved!');
+  renderLift();
+}
+
+function renderPctCalc(){
+  const u = S.settings.unit;
+  return `
+    <div class="card">
+      <h2>1RM Percentage Calculator</h2>
+      <div class="form-row"><label>1RM (${u})</label><input type="number" id="calc1rm" step="0.5" value="${u==='lb'?225:100}"></div>
+      <div id="calcOut" style="margin-top:12px"></div>
+    </div>
+    <div class="muted">Standard CrossFit training percentages from 50% to 95%. Use for warm-up loading and strength cycles.</div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Cardio Converter — Distance</h2>
+      <div class="form-row">
+        <label>Sport</label>
+        <div class="opt-row" id="cm_sport">
+          <div class="opt active" data-v="run">Run</div>
+          <div class="opt" data-v="row">Row</div>
+          <div class="opt" data-v="bikeerg">Bike-erg</div>
+          <div class="opt" data-v="skierg">Ski-erg</div>
+          <div class="opt" data-v="assault">Assault</div>
+        </div>
+      </div>
+      <div class="form-row grid2">
+        <div><label>Amount (<span id="cm_unit">m</span>)</label><input type="number" id="cm_val" step="1" value="1000"></div>
+        <div><label>Gender</label>
+          <div class="opt-row" id="cm_gender">
+            <div class="opt active" data-v="M">M</div>
+            <div class="opt" data-v="F">F</div>
+          </div>
+        </div>
+      </div>
+      <div id="cm_out" style="margin-top:12px"></div>
+    </div>
+    <div class="muted">Run 1000m ≈ Row 1250/1000m · Bike-erg 2000m · Ski-erg 1250/1000m · Assault 75/50 cal (M/F).</div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Cardio Converter — Calories / Shuttle</h2>
+      <div class="form-row">
+        <label>Sport</label>
+        <div class="opt-row" id="cc_sport">
+          <div class="opt active" data-v="shuttle">Shuttle</div>
+          <div class="opt" data-v="row">Row</div>
+          <div class="opt" data-v="assault">Assault</div>
+          <div class="opt" data-v="bikeski">Bike/Ski</div>
+          <div class="opt" data-v="run">Run</div>
+        </div>
+      </div>
+      <div class="form-row grid2">
+        <div><label>Amount (<span id="cc_unit">shuttles</span>)</label><input type="number" id="cc_val" step="1" value="10"></div>
+        <div><label>Gender</label>
+          <div class="opt-row" id="cc_gender">
+            <div class="opt active" data-v="M">M</div>
+            <div class="opt" data-v="F">F</div>
+          </div>
+        </div>
+      </div>
+      <div id="cc_out" style="margin-top:12px"></div>
+    </div>
+    <div class="muted">1 Shuttle ≈ Row/Bike·Ski-Erg 1 cal · Assault 0.7 cal · Run 10m (M) / 15m (F).</div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Unit Converter</h2>
+      <div class="form-row grid2">
+        <div><label>Meters (m)</label><input type="number" id="uc_m" step="0.01" value="1000"></div>
+        <div><label>Feet (ft)</label><input type="number" id="uc_ft" step="0.01"></div>
+      </div>
+      <div class="form-row grid2">
+        <div><label>Kilometers (km)</label><input type="number" id="uc_km" step="0.0001"></div>
+        <div><label>Miles (mi)</label><input type="number" id="uc_mi" step="0.0001"></div>
+      </div>
+    </div>
+    <div class="muted">1 m = 3.28084 ft · 1 km = 0.62137 mi. Edit any field to update the others live.</div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Calculator</h2>
+      <div id="calc_screen" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;text-align:right;font-variant-numeric:tabular-nums">
+        <div id="calc_hist" class="muted" style="min-height:14px;font-size:12px;color:var(--text2)">&nbsp;</div>
+        <div id="calc_disp" class="hi" style="font-size:28px;font-weight:700;line-height:1.2;word-break:break-all">0</div>
+      </div>
+      <div class="opt-row" style="margin-bottom:6px">
+        <div class="opt" data-ck="C" style="flex:2">C</div>
+        <div class="opt" data-ck="back">⌫</div>
+        <div class="opt" data-ck="/">÷</div>
+      </div>
+      <div class="opt-row" style="margin-bottom:6px">
+        <div class="opt" data-ck="7">7</div>
+        <div class="opt" data-ck="8">8</div>
+        <div class="opt" data-ck="9">9</div>
+        <div class="opt" data-ck="*">×</div>
+      </div>
+      <div class="opt-row" style="margin-bottom:6px">
+        <div class="opt" data-ck="4">4</div>
+        <div class="opt" data-ck="5">5</div>
+        <div class="opt" data-ck="6">6</div>
+        <div class="opt" data-ck="-">−</div>
+      </div>
+      <div class="opt-row" style="margin-bottom:6px">
+        <div class="opt" data-ck="1">1</div>
+        <div class="opt" data-ck="2">2</div>
+        <div class="opt" data-ck="3">3</div>
+        <div class="opt" data-ck="+">+</div>
+      </div>
+      <div class="opt-row">
+        <div class="opt" data-ck="neg">±</div>
+        <div class="opt" data-ck="0">0</div>
+        <div class="opt" data-ck=".">.</div>
+        <div class="opt active" data-ck="=">=</div>
+      </div>
+    </div>
+    <div class="muted">Keyboard: 0–9 . + − * / Enter (=) · Backspace · Esc (C).</div>
+  `;
+}
+function updateLiftPct(){
+  const v = parseFloat(document.getElementById('calc1rm').value) || 0;
+  const u = S.settings.unit;
+  const pct = [50,55,60,65,70,75,80,85,90,95];
+  document.getElementById('calcOut').innerHTML = `<div class="lift-pct">${pct.map(p=>{
+    const w = v * p / 100;
+    return `<div class="row"><span class="pp">${p}%</span><span class="pv">${(Math.round(w*10)/10)} ${u}</span></div>`;
+  }).join('')}</div>`;
+}
+
+// Cardio distance chart: amount of {sport} per 1m of Run
+const CARDIO_M = {
+  run:     { M: 1.0,   F: 1.0,  unit: 'm',   label: 'Run' },
+  row:     { M: 1.25,  F: 1.0,  unit: 'm',   label: 'Row' },
+  bikeerg: { M: 2.0,   F: 2.0,  unit: 'm',   label: 'Bike-erg' },
+  skierg:  { M: 1.25,  F: 1.0,  unit: 'm',   label: 'Ski-erg' },
+  assault: { M: 0.075, F: 0.05, unit: 'cal', label: 'Assault Bike' }
+};
+function updateCardioM(){
+  const sport  = document.querySelector('#cm_sport .opt.active')?.dataset.v  || 'run';
+  const gender = document.querySelector('#cm_gender .opt.active')?.dataset.v || 'M';
+  const val = parseFloat(document.getElementById('cm_val').value) || 0;
+  document.getElementById('cm_unit').textContent = CARDIO_M[sport].unit;
+  const runM = val / CARDIO_M[sport][gender];
+  document.getElementById('cm_out').innerHTML = `<div class="lift-pct">${
+    Object.keys(CARDIO_M).filter(k=>k!==sport).map(k=>{
+      const v = runM * CARDIO_M[k][gender];
+      return `<div class="row"><span class="pp">${CARDIO_M[k].label}</span><span class="pv">${Math.round(v*10)/10} ${CARDIO_M[k].unit}</span></div>`;
+    }).join('')
+  }</div>`;
+}
+function bindCardioM(){
+  if(!document.getElementById('cm_val')) return;
+  document.querySelectorAll('#cm_sport .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      document.querySelectorAll('#cm_sport .opt').forEach(x=>x.classList.remove('active'));
+      o.classList.add('active'); updateCardioM();
+    });
+  });
+  document.querySelectorAll('#cm_gender .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      document.querySelectorAll('#cm_gender .opt').forEach(x=>x.classList.remove('active'));
+      o.classList.add('active'); updateCardioM();
+    });
+  });
+  document.getElementById('cm_val').addEventListener('input', updateCardioM);
+  updateCardioM();
+}
+
+// Cardio calorie chart: amount of {sport} per 1 shuttle (10-m)
+const CARDIO_C = {
+  shuttle: { M: 1.0, F: 1.0,  unit: 'shuttles', label: '10-m Shuttle' },
+  row:     { M: 1.0, F: 1.0,  unit: 'cal',      label: 'Row' },
+  assault: { M: 0.7, F: 0.7,  unit: 'cal',      label: 'Assault Bike' },
+  bikeski: { M: 1.0, F: 1.0,  unit: 'cal',      label: 'Bike/Ski-Erg' },
+  run:     { M: 10,  F: 15,   unit: 'm',        label: 'Run' }
+};
+function updateCardioC(){
+  const sport  = document.querySelector('#cc_sport .opt.active')?.dataset.v  || 'shuttle';
+  const gender = document.querySelector('#cc_gender .opt.active')?.dataset.v || 'M';
+  const val = parseFloat(document.getElementById('cc_val').value) || 0;
+  document.getElementById('cc_unit').textContent = CARDIO_C[sport].unit;
+  const shuttles = val / CARDIO_C[sport][gender];
+  document.getElementById('cc_out').innerHTML = `<div class="lift-pct">${
+    Object.keys(CARDIO_C).filter(k=>k!==sport).map(k=>{
+      const v = shuttles * CARDIO_C[k][gender];
+      return `<div class="row"><span class="pp">${CARDIO_C[k].label}</span><span class="pv">${Math.round(v*10)/10} ${CARDIO_C[k].unit}</span></div>`;
+    }).join('')
+  }</div>`;
+}
+function bindCardioC(){
+  if(!document.getElementById('cc_val')) return;
+  document.querySelectorAll('#cc_sport .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      document.querySelectorAll('#cc_sport .opt').forEach(x=>x.classList.remove('active'));
+      o.classList.add('active'); updateCardioC();
+    });
+  });
+  document.querySelectorAll('#cc_gender .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      document.querySelectorAll('#cc_gender .opt').forEach(x=>x.classList.remove('active'));
+      o.classList.add('active'); updateCardioC();
+    });
+  });
+  document.getElementById('cc_val').addEventListener('input', updateCardioC);
+  updateCardioC();
+}
+
+// Length unit converter — m ↔ ft, km ↔ mi (all four linked)
+function bindUnitConv(){
+  const m  = document.getElementById('uc_m');
+  const ft = document.getElementById('uc_ft');
+  const km = document.getElementById('uc_km');
+  const mi = document.getElementById('uc_mi');
+  if(!m) return;
+  let busy = false;
+  const trim = (n, d) => {
+    if(!isFinite(n)) return '';
+    const r = Math.round(n * Math.pow(10,d)) / Math.pow(10,d);
+    return String(r);
+  };
+  function fromMeters(meters, src){
+    if(busy) return;
+    busy = true;
+    if(src !== m)  m.value  = trim(meters, 2);
+    if(src !== ft) ft.value = trim(meters * 3.28084, 2);
+    if(src !== km) km.value = trim(meters / 1000, 4);
+    if(src !== mi) mi.value = trim(meters * 0.000621371, 4);
+    busy = false;
+  }
+  m.addEventListener('input',  ()=> fromMeters((parseFloat(m.value) ||0),                    m));
+  ft.addEventListener('input', ()=> fromMeters((parseFloat(ft.value)||0) / 3.28084,          ft));
+  km.addEventListener('input', ()=> fromMeters((parseFloat(km.value)||0) * 1000,             km));
+  mi.addEventListener('input', ()=> fromMeters((parseFloat(mi.value)||0) / 0.000621371,      mi));
+  fromMeters(parseFloat(m.value)||0, m);
+}
+
+// Basic calculator (single-pending-op model, like a phone calculator)
+const CALC = { disp: '0', acc: null, op: null, justEvaled: false, hist: '' };
+const CALC_OPS = { '+': (a,b)=>a+b, '-': (a,b)=>a-b, '*': (a,b)=>a*b, '/': (a,b)=> b===0?NaN:a/b };
+const CALC_SYM = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+function calcFmt(n){
+  if(!isFinite(n)) return 'Error';
+  const r = Math.round(n * 1e10) / 1e10;
+  let s = String(r);
+  if(s.indexOf('e') === -1 && s.length > 14) s = r.toPrecision(12);
+  return s;
+}
+function calcRender(){
+  const d = document.getElementById('calc_disp');
+  const h = document.getElementById('calc_hist');
+  if(d) d.textContent = CALC.disp;
+  if(h) h.innerHTML = CALC.hist || '&nbsp;';
+}
+function calcReset(){ CALC.disp='0'; CALC.acc=null; CALC.op=null; CALC.justEvaled=false; CALC.hist=''; calcRender(); }
+function calcInputDigit(d){
+  if(CALC.justEvaled){ CALC.disp='0'; CALC.justEvaled=false; CALC.hist=''; }
+  if(CALC.disp === '0' && d !== '.') CALC.disp = d;
+  else if(d === '.' && CALC.disp.indexOf('.') !== -1) return;
+  else if(CALC.disp.replace('-','').length >= 14) return;
+  else CALC.disp += d;
+  calcRender();
+}
+function calcBack(){
+  if(CALC.justEvaled){ calcReset(); return; }
+  let s = CALC.disp;
+  if(s.length <= 1 || (s.length === 2 && s.startsWith('-'))) CALC.disp = '0';
+  else CALC.disp = s.slice(0, -1);
+  calcRender();
+}
+function calcNeg(){
+  if(CALC.disp === '0' || CALC.disp === 'Error') return;
+  CALC.disp = CALC.disp.startsWith('-') ? CALC.disp.slice(1) : '-' + CALC.disp;
+  CALC.justEvaled = false;
+  calcRender();
+}
+function calcOp(op){
+  const cur = parseFloat(CALC.disp);
+  if(CALC.acc !== null && CALC.op && !CALC.justEvaled){
+    const r = CALC_OPS[CALC.op](CALC.acc, cur);
+    CALC.acc = r;
+    CALC.disp = calcFmt(r);
+  } else {
+    CALC.acc = cur;
+  }
+  CALC.op = op;
+  CALC.justEvaled = false;
+  CALC.hist = `${calcFmt(CALC.acc)} ${CALC_SYM[op]}`;
+  CALC.disp = calcFmt(CALC.acc);
+  // mark display as "ready for fresh entry": next digit replaces it
+  CALC.pendingFresh = true;
+  calcRender();
+}
+function calcEq(){
+  if(CALC.op === null || CALC.acc === null) return;
+  const cur = parseFloat(CALC.disp);
+  const r = CALC_OPS[CALC.op](CALC.acc, cur);
+  CALC.hist = `${calcFmt(CALC.acc)} ${CALC_SYM[CALC.op]} ${calcFmt(cur)} =`;
+  CALC.disp = calcFmt(r);
+  CALC.acc = null;
+  CALC.op = null;
+  CALC.justEvaled = true;
+  calcRender();
+}
+function calcKey(k){
+  if(/^[0-9]$/.test(k) || k === '.'){
+    if(CALC.pendingFresh){ CALC.disp = '0'; CALC.pendingFresh = false; }
+    calcInputDigit(k);
+  }
+  else if(k === '+' || k === '-' || k === '*' || k === '/'){ CALC.pendingFresh = false; calcOp(k); }
+  else if(k === '=') { CALC.pendingFresh = false; calcEq(); }
+  else if(k === 'C') calcReset();
+  else if(k === 'back') calcBack();
+  else if(k === 'neg') calcNeg();
+}
+function bindCalc(){
+  if(!document.getElementById('calc_disp')) return;
+  calcReset();
+  document.querySelectorAll('[data-ck]').forEach(b=>{
+    b.addEventListener('click', ()=> calcKey(b.dataset.ck));
+  });
+}
+function calcKeyboardHandler(e){
+  if(!document.getElementById('calc_disp')) return;
+  if(liftPill !== 'calc') return;
+  const tag = (e.target && e.target.tagName) || '';
+  if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const k = e.key;
+  if(/^[0-9.]$/.test(k)){ calcKey(k); e.preventDefault(); }
+  else if(k === '+' || k === '-' || k === '*' || k === '/'){ calcKey(k); e.preventDefault(); }
+  else if(k === 'Enter' || k === '='){ calcKey('='); e.preventDefault(); }
+  else if(k === 'Backspace'){ calcKey('back'); e.preventDefault(); }
+  else if(k === 'Escape' || k === 'c' || k === 'C'){ calcKey('C'); e.preventDefault(); }
+}
+if(typeof window !== 'undefined' && !window._calcKbBound){
+  window.addEventListener('keydown', calcKeyboardHandler);
+  window._calcKbBound = true;
+}
+
+function renderBarLoading(){
+  const u = S.settings.unit;
+  return `
+    <div class="card">
+      <h2>Bar Loading Calculator</h2>
+      <div class="muted" style="margin-bottom:8px">Tap +/− to add/remove plates per side. Total updates live.</div>
+      <div class="form-row">
+        <label>Bar</label>
+        <div class="opt-row" id="bar_sel">
+          ${u==='lb'
+            ? `<div class="opt active" data-v="45">45 lb</div><div class="opt" data-v="35">35 lb</div>`
+            : `<div class="opt active" data-v="20">20 kg</div><div class="opt" data-v="15">15 kg</div>`}
+        </div>
+      </div>
+      <div class="bar-display">
+        <div class="bar-total" id="barTotal">— ${u}</div>
+        <div class="bar-sides" id="barSides">Empty bar</div>
+      </div>
+      <div id="plateRows"></div>
+      <button class="btn full" id="barClear" style="margin-top:8px">Clear All Plates</button>
+    </div>
+  `;
+}
+
+let plateCounts = {};
+let barWeight = 45;
+function bindBarLoader(){
+  if(!document.getElementById('plateRows')) return;
+  const u = S.settings.unit;
+  const plates = u === 'lb' ? [55,45,35,25,15,10,5,2.5] : [25,20,15,10,5,2.5];
+  plateCounts = {};
+  plates.forEach(p=>plateCounts[p]=0);
+  barWeight = u === 'lb' ? 45 : 20;
+  bindOptRow('bar_sel');
+  document.querySelectorAll('#bar_sel .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{ barWeight = parseFloat(o.dataset.v); updateBarDisplay(); });
+  });
+  document.getElementById('plateRows').innerHTML = plates.map(p=>`
+    <div class="plate-row">
+      <span class="pname">${p} ${u}</span>
+      <span class="plate-ops">
+        <button data-pm="-${p}">−</button>
+        <span class="cnt" id="cnt_${String(p).replace('.','_')}">0</span>
+        <button data-pm="+${p}">+</button>
+      </span>
+    </div>
+  `).join('');
+  document.querySelectorAll('[data-pm]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const v = b.dataset.pm; const sign = v[0]; const p = parseFloat(v.slice(1));
+      if(sign === '+') plateCounts[p] = (plateCounts[p]||0)+1;
+      else if(plateCounts[p]>0) plateCounts[p]--;
+      updateBarDisplay();
+      ensureAudio(); beepLow();
+    });
+  });
+  document.getElementById('barClear').addEventListener('click', ()=>{
+    Object.keys(plateCounts).forEach(k=>plateCounts[k]=0);
+    updateBarDisplay();
+  });
+  updateBarDisplay();
+}
+function updateBarDisplay(){
+  const u = S.settings.unit;
+  let perSide = 0; let parts = [];
+  Object.keys(plateCounts).map(parseFloat).sort((a,b)=>b-a).forEach(p=>{
+    const c = plateCounts[p];
+    if(c>0){ perSide += p*c; parts.push(`${p}×${c}`); }
+    const cntEl = document.getElementById(`cnt_${String(p).replace('.','_')}`);
+    if(cntEl) cntEl.textContent = c;
+  });
+  const total = barWeight + perSide*2;
+  document.getElementById('barTotal').textContent = `${Math.round(total*10)/10} ${u}`;
+  document.getElementById('barSides').innerHTML = parts.length
+    ? `Bar ${barWeight} ${u} + <b>${Math.round(perSide*10)/10} ${u}</b> per side<br><span class="muted">${parts.join(', ')}</span>`
+    : `${barWeight} ${u} bar (empty)`;
+}
+
+function renderGymList(){
+  return GYM_NAMES.map(G=>{
+    const recs = S.gymnasticsRecords.filter(r=>r.exercise===G.k).sort((a,b)=>b.date.localeCompare(a.date));
+    const pr = recs.length ? Math.max(...recs.map(r=>parseInt(r.value)||0)) : 0;
+    const sortedAsc = [...recs].sort((a,b)=>a.date.localeCompare(b.date));
+    let runMax = 0;
+    const enriched = sortedAsc.map(r=>{
+      const v = parseInt(r.value)||0; const isPr = v > runMax;
+      if(isPr) runMax = v;
+      return {...r, isPr};
+    }).reverse();
+    return `
+      <div class="card">
+        <h2>${G.n} <span class="hi" style="margin-left:auto;font-size:18px">${pr?pr+' '+G.unit:'—'}</span></h2>
+        <button class="btn sm primary" data-gym-add="${G.k}">+ Log Max</button>
+        <div style="margin-top:8px">
+          ${enriched.length === 0 ? '<div class="empty" style="padding:8px">No records</div>' :
+            enriched.map(r=>`<div class="record-item">
+              <div class="lhs"><div class="name">${r.value} ${G.unit} ${r.isPr?'<span class="chip pr">🎉 PR</span>':''}</div><div class="meta">${fmtDate(r.date)}</div></div>
+              <button class="btn sm danger" data-gym-del="${r.id}">×</button>
+            </div>`).join('')
+          }
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openGymLog(key){
+  const G = GYM_NAMES.find(x=>x.k===key);
+  showModal(`
+    <h2>Log ${G.n} <button class="close" onclick="closeModal()">✕</button></h2>
+    <div class="form-row"><label>Date</label><input type="date" id="gm_date" value="${today()}"></div>
+    <div class="form-row"><label>Max ${G.unit}</label><input type="number" id="gm_v" min="0"></div>
+    <button class="btn primary full lg" onclick="saveGym('${key}')">Save</button>
+  `);
+}
+function saveGym(key){
+  const date = document.getElementById('gm_date').value;
+  const v = parseInt(document.getElementById('gm_v').value);
+  if(!v || v<=0){ toast('Enter a value'); return; }
+  S.gymnasticsRecords.push({id:uid(), date, exercise:key, value:v});
+  saveState(); closeModal(); toast('Saved!'); renderLift();
+}
+
+//=========================================================
+// RUNNING
+//=========================================================
+function renderRunList(){
+  const recs = [...S.runningRecords].sort((a,b)=>b.date.localeCompare(a.date));
+  // Group by distanceLabel (preset key) for PR table
+  const grouped = {};
+  recs.forEach(r=>{
+    const key = r.distanceLabel || `${r.distanceM}m`;
+    if(!grouped[key]) grouped[key] = [];
+    grouped[key].push(r);
+  });
+  const prRows = Object.keys(grouped).map(k=>{
+    const arr = grouped[k];
+    const best = arr.reduce((b,r)=>(!b||r.timeSec<b.timeSec)?r:b, null);
+    return {label:k, best, count:arr.length};
+  }).sort((a,b)=>(a.best?.distanceM||0)-(b.best?.distanceM||0));
+
+  return `
+    <div class="card">
+      <h2>🏃 Log a Run</h2>
+      <div class="form-row">
+        <label>Distance Preset</label>
+        <div class="opt-row" id="run_preset">
+          ${RUN_PRESETS.map((p,i)=>`<div class="opt${i===0?' active':''}" data-v="${p.k}" data-m="${p.m}" data-l="${p.n}">${p.n}</div>`).join('')}
+          <div class="opt" data-v="custom" data-m="0" data-l="Custom">Custom</div>
+        </div>
+      </div>
+      <div class="form-row grid2" id="run_customRow" hidden>
+        <div><label>Distance</label><input type="number" id="run_distVal" step="0.01" placeholder="e.g. 3.2"></div>
+        <div><label>Unit</label>
+          <div class="opt-row" id="run_unit">
+            <div class="opt active" data-v="km">km</div>
+            <div class="opt" data-v="mi">mi</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Time (hh:mm:ss)</label>
+        <div class="grid3">
+          <input type="number" id="run_h" placeholder="hh" min="0">
+          <input type="number" id="run_m" placeholder="mm" min="0" max="59">
+          <input type="number" id="run_s" placeholder="ss" min="0" max="59">
+        </div>
+      </div>
+      <div class="form-row grid2">
+        <div><label>Date</label><input type="date" id="run_date" value="${today()}"></div>
+        <div><label>Pace</label><div id="run_pace" class="muted" style="padding-top:10px">—</div></div>
+      </div>
+      <div class="form-row"><label>Notes</label><input id="run_notes" placeholder="route, conditions, gear..."></div>
+      <button class="btn primary full lg" onclick="saveRun()">Save Run</button>
+    </div>
+
+    <div class="card">
+      <h2>🏆 PRs by Distance (${prRows.length})</h2>
+      ${prRows.length === 0 ? '<div class="empty">No runs logged yet</div>' :
+        prRows.map(p=>`
+          <div class="record-item">
+            <div class="lhs">
+              <div class="name">${escapeHtml(p.label)}</div>
+              <div class="meta">${fmtDate(p.best.date)} · ${p.count} log${p.count>1?'s':''} · ${formatPace(p.best.distanceM, p.best.timeSec)}</div>
+            </div>
+            <div class="val">${fmtSecondsHuman(p.best.timeSec)}</div>
+          </div>
+        `).join('')}
+    </div>
+
+    <div class="card">
+      <h2>📜 All Runs (${recs.length})</h2>
+      ${recs.length === 0 ? '<div class="empty">No runs yet</div>' :
+        recs.map(r=>{
+          const label = r.distanceLabel || `${r.distanceM}m`;
+          return `<div class="record-item">
+            <div class="lhs">
+              <div class="name">${escapeHtml(label)} · ${fmtSecondsHuman(r.timeSec)}</div>
+              <div class="meta">${fmtDate(r.date)} · ${formatPace(r.distanceM, r.timeSec)}${r.notes?' · '+escapeHtml(r.notes):''}</div>
+            </div>
+            <button class="btn sm danger" data-run-del="${r.id}">×</button>
+          </div>`;
+        }).join('')
+      }
+    </div>
+  `;
+}
+
+function bindRunForm(){
+  if(!document.getElementById('run_preset')) return;
+  bindOptRow('run_preset');
+  bindOptRow('run_unit');
+  document.querySelectorAll('#run_preset .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      const isCustom = o.dataset.v === 'custom';
+      document.getElementById('run_customRow').hidden = !isCustom;
+      updateRunPace();
+    });
+  });
+  ['run_h','run_m','run_s','run_distVal'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', updateRunPace);
+  });
+  document.querySelectorAll('#run_unit .opt').forEach(o=>{
+    o.addEventListener('click', updateRunPace);
+  });
+}
+function getRunDistanceM(){
+  const sel = document.querySelector('#run_preset .opt.active');
+  if(!sel) return 0;
+  if(sel.dataset.v === 'custom'){
+    const v = parseFloat(document.getElementById('run_distVal').value)||0;
+    const u = readOpt('run_unit') || 'km';
+    return u === 'km' ? v*1000 : v*1609.344;
+  }
+  return parseFloat(sel.dataset.m)||0;
+}
+function getRunTimeSec(){
+  const h = parseInt(document.getElementById('run_h').value)||0;
+  const m = parseInt(document.getElementById('run_m').value)||0;
+  const s = parseInt(document.getElementById('run_s').value)||0;
+  return h*3600 + m*60 + s;
+}
+function formatPace(distM, timeSec){
+  if(!distM || !timeSec) return '—';
+  const perKm = timeSec / (distM/1000);
+  const perMi = timeSec / (distM/1609.344);
+  return `${fmtSecondsHuman(perKm)}/km · ${fmtSecondsHuman(perMi)}/mi`;
+}
+function updateRunPace(){
+  const distM = getRunDistanceM();
+  const timeSec = getRunTimeSec();
+  const out = document.getElementById('run_pace');
+  if(out) out.textContent = formatPace(distM, timeSec);
+}
+function saveRun(){
+  const date = document.getElementById('run_date').value;
+  const distM = getRunDistanceM();
+  const timeSec = getRunTimeSec();
+  if(!distM || distM <= 0){ toast('Pick or enter a distance'); return; }
+  if(!timeSec || timeSec <= 0){ toast('Enter a time'); return; }
+  const sel = document.querySelector('#run_preset .opt.active');
+  let label = sel?.dataset.l || 'Custom';
+  if(sel?.dataset.v === 'custom'){
+    const v = parseFloat(document.getElementById('run_distVal').value)||0;
+    const u = readOpt('run_unit') || 'km';
+    label = `${v} ${u}`;
+  }
+  const notes = document.getElementById('run_notes').value.trim();
+  const same = S.runningRecords.filter(r=>(r.distanceLabel||'')===label);
+  const prevBest = same.reduce((b,r)=>(!b||r.timeSec<b.timeSec)?r:b, null);
+  const isPr = !prevBest || timeSec < prevBest.timeSec;
+  S.runningRecords.push({id:uid(), date, distanceM:distM, distanceLabel:label, timeSec, notes});
+  saveState();
+  toast(isPr ? '🎉 New PR!' : 'Saved!');
+  renderLift();
+}
+
+//=========================================================
+// ANALYSIS TAB
+//=========================================================
+let analysisPill = 'prtimeline';
+let chartRefs = [];
+function destroyCharts(){ chartRefs.forEach(c=>{try{c.destroy()}catch(e){}}); chartRefs = []; }
+
+document.querySelectorAll('[data-apill]').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-apill]').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    analysisPill = p.dataset.apill;
+    renderAnalysis();
+  });
+});
+
+function renderAnalysis(){
+  destroyCharts();
+  const a = document.getElementById('analysisArea');
+  if(analysisPill === 'prtimeline'){
+    a.innerHTML = renderPrTimelineView();
+    document.getElementById('prLiftSelect').addEventListener('change', drawPrTimelineChart);
+    drawPrTimelineChart();
+  }
+  else if(analysisPill === 'bodylift'){
+    a.innerHTML = renderBodyLiftView();
+    document.getElementById('blLiftSelect').addEventListener('change', drawBodyLiftChart);
+    drawBodyLiftChart();
+  }
+  else if(analysisPill === 'wodstats'){
+    a.innerHTML = renderWodStatsView();
+    drawWodPie();
+    drawMonthBar();
+  }
+  else if(analysisPill === 'open'){
+    a.innerHTML = renderOpenView();
+    drawOpenChart();
+  }
+}
+
+function renderPrTimelineView(){
+  return `
+    <div class="card">
+      <h2>🏆 PR Timeline by Lift</h2>
+      <select id="prLiftSelect">${LIFT_NAMES.map(L=>`<option value="${L.k}">${L.n}</option>`).join('')}</select>
+      <div style="height:240px;margin-top:10px"><canvas id="prChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>📜 All-Lift PR History</h2>
+      <div id="allPrList"></div>
+    </div>
+  `;
+}
+function drawPrTimelineChart(){
+  destroyCharts();
+  const liftKey = document.getElementById('prLiftSelect').value;
+  const recs = S.liftingRecords.filter(r=>r.lift===liftKey).sort((a,b)=>a.date.localeCompare(b.date));
+  const u = S.settings.unit;
+  let runMax = 0;
+  const prSeries = recs.filter(r=>{ const v = rawToCurrent(r.weight, r.unit||'lb'); if(v>runMax){runMax=v;return true;} return false; })
+    .map(r=>({date:r.date, v:rawToCurrent(r.weight, r.unit||'lb')}));
+  const canvas = document.getElementById('prChart');
+  if(!canvas) return;
+  if(prSeries.length === 0){ canvas.parentElement.innerHTML = '<div class="empty" style="padding:24px">No PR data yet — log lifts in the Lifting tab</div>'; renderAllPrList(); return; }
+  const c = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{ labels: prSeries.map(p=>p.date), datasets:[{label:'PR ('+u+')', data: prSeries.map(p=>Math.round(p.v*10)/10), borderColor:'#F5C518', backgroundColor:'rgba(245,197,24,0.2)', tension:0.2, fill:true, pointRadius:5}] },
+    options:{ responsive:true, maintainAspectRatio:false, scales:{x:{ticks:{color:'#A0B0C0'}},y:{ticks:{color:'#A0B0C0'}}}, plugins:{legend:{labels:{color:'#A0B0C0'}}} }
+  });
+  chartRefs.push(c);
+  renderAllPrList();
+}
+function renderAllPrList(){
+  const all = [];
+  LIFT_NAMES.forEach(L=>{
+    const recs = S.liftingRecords.filter(r=>r.lift===L.k).sort((a,b)=>a.date.localeCompare(b.date));
+    let max = 0;
+    recs.forEach(r=>{ const v = rawToCurrent(r.weight, r.unit||'lb'); if(v>max){max=v; all.push({date:r.date, name:L.n, value:`${Math.round(v*10)/10} ${S.settings.unit}`});} });
+  });
+  all.sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('allPrList').innerHTML = all.length === 0 ? '<div class="empty">No PRs yet</div>' :
+    all.slice(0,20).map(p=>`<div class="record-item">
+      <div class="lhs"><div class="name">${escapeHtml(p.name)}</div><div class="meta">${fmtDate(p.date)}</div></div>
+      <div class="val">🏆 ${escapeHtml(p.value)}</div>
+    </div>`).join('');
+}
+
+function renderBodyLiftView(){
+  return `
+    <div class="card">
+      <h2>📈 Body Weight vs 1RM</h2>
+      <div class="muted" style="margin-bottom:8px">Body weight comes from WOD Log entries.</div>
+      <select id="blLiftSelect">${LIFT_NAMES.map(L=>`<option value="${L.k}">${L.n}</option>`).join('')}</select>
+      <div style="height:260px;margin-top:10px"><canvas id="bodyLiftChart"></canvas></div>
+      <div class="muted" id="bodyLiftHint" style="margin-top:6px"></div>
+    </div>
+  `;
+}
+function drawBodyLiftChart(){
+  destroyCharts();
+  const liftKey = document.getElementById('blLiftSelect').value;
+  const liftRecs = S.liftingRecords.filter(r=>r.lift===liftKey).sort((a,b)=>a.date.localeCompare(b.date));
+  const bodyRecs = S.wodLogs.filter(b=>b.bodyWeight).sort((a,b)=>a.date.localeCompare(b.date));
+  const u = S.settings.unit;
+  const canvas = document.getElementById('bodyLiftChart');
+  if(!canvas) return;
+  if(liftRecs.length === 0){ canvas.parentElement.innerHTML = '<div class="empty" style="padding:24px">No lift data — log a 1RM first</div>'; return; }
+  const allDates = Array.from(new Set([...liftRecs.map(r=>r.date), ...bodyRecs.map(r=>r.date)])).sort();
+  const liftMap = {}; liftRecs.forEach(r=>{ liftMap[r.date] = rawToCurrent(r.weight, r.unit||'lb'); });
+  const bodyMap = {};
+  bodyRecs.forEach(r=>{
+    const v = rawToCurrent(r.bodyWeight, r.bodyWeightUnit||'lb');
+    if(bodyMap[r.date] == null) bodyMap[r.date] = v;
+    else bodyMap[r.date] = (bodyMap[r.date]+v)/2;
+  });
+  const liftSeries = allDates.map(d=>liftMap[d]??null);
+  const bodySeries = allDates.map(d=>bodyMap[d]??null);
+  let best = liftRecs[0];
+  liftRecs.forEach(r=>{ if(rawToCurrent(r.weight, r.unit||'lb') > rawToCurrent(best.weight, best.unit||'lb')) best = r; });
+  let bw = '—';
+  if(best && bodyRecs.length){
+    let closest = bodyRecs[0], bestDiff = Infinity;
+    bodyRecs.forEach(b=>{ const d = Math.abs(new Date(b.date) - new Date(best.date)); if(d<bestDiff){bestDiff=d;closest=b;} });
+    bw = dispWeight(closest.bodyWeight, closest.bodyWeightUnit||'lb');
+  }
+  document.getElementById('bodyLiftHint').textContent = `Peak 1RM ${dispWeight(best.weight, best.unit||'lb')} on ${fmtDate(best.date)} · BW then: ${bw}`;
+  const c = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{ labels: allDates, datasets:[
+      {label:'1RM ('+u+')', data:liftSeries, borderColor:'#F5C518', backgroundColor:'rgba(245,197,24,0.15)', tension:0.3, yAxisID:'y', spanGaps:true},
+      ...(bodyRecs.length?[{label:'BW ('+u+')', data:bodySeries, borderColor:'#A0B0C0', backgroundColor:'rgba(160,176,192,0.15)', tension:0.3, yAxisID:'y1', spanGaps:true}]:[])
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index'},
+      scales:{ x:{ticks:{color:'#A0B0C0'}}, y:{position:'left', ticks:{color:'#F5C518'}, title:{display:true,text:'1RM',color:'#F5C518'}}, y1:{position:'right', ticks:{color:'#A0B0C0'}, grid:{drawOnChartArea:false}, title:{display:true,text:'BW',color:'#A0B0C0'}} },
+      plugins:{ legend:{labels:{color:'#A0B0C0'}} }
+    }
+  });
+  chartRefs.push(c);
+}
+
+function renderWodStatsView(){
+  const visible = S.wodLogs.filter(w=>w.category!=='system');
+  const total = visible.length;
+  const counts = {};
+  visible.forEach(w=>{ counts[w.wodName] = (counts[w.wodName]||0)+1; });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  let hero=0, girl=0, notable=0, custom=0;
+  visible.forEach(w=>{
+    if(HERO_WODS.find(h=>h.n===w.wodName)) hero++;
+    else if(GIRL_WODS.find(g=>g.n===w.wodName)) girl++;
+    else if(NOTABLE_WODS.find(n=>n.n===w.wodName)) notable++;
+    else custom++;
+  });
+  return `
+    <div class="stat-grid">
+      <div class="stat"><div class="v">${total}</div><div class="l">Total</div></div>
+      <div class="stat"><div class="v">${Object.keys(counts).length}</div><div class="l">Unique</div></div>
+      <div class="stat"><div class="v">${hero}</div><div class="l">Hero</div></div>
+      <div class="stat"><div class="v">${girl}</div><div class="l">Girls</div></div>
+    </div>
+    <div class="card">
+      <h2>🥧 Hero / Girls / Notable / Custom</h2>
+      <div style="height:240px"><canvas id="wodPie"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>📅 Monthly Volume (Last 12 Months)</h2>
+      <div style="height:200px"><canvas id="monthBar"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>🏆 Top 10 Most Performed WODs</h2>
+      ${top.length === 0 ? '<div class="empty">No WOD records</div>' :
+        top.slice(0,10).map(([n,c],i)=>`<div class="record-item">
+          <div class="lhs"><div class="name">${i+1}. ${escapeHtml(n)}</div></div>
+          <div class="val">${c}×</div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+function drawWodPie(){
+  let hero=0, girl=0, notable=0, custom=0;
+  S.wodLogs.filter(w=>w.category!=='system').forEach(w=>{
+    if(HERO_WODS.find(h=>h.n===w.wodName)) hero++;
+    else if(GIRL_WODS.find(g=>g.n===w.wodName)) girl++;
+    else if(NOTABLE_WODS.find(n=>n.n===w.wodName)) notable++;
+    else custom++;
+  });
+  const canvas = document.getElementById('wodPie');
+  if(!canvas) return;
+  if(hero+girl+notable+custom === 0){ canvas.parentElement.innerHTML = '<div class="empty" style="padding:24px">No data</div>'; return; }
+  const c = new Chart(canvas.getContext('2d'),{
+    type:'doughnut',
+    data:{ labels:['Hero','Girls','Notable','Custom'], datasets:[{data:[hero,girl,notable,custom], backgroundColor:['#F5C518','#A0B0C0','#EF4444','#10B981'], borderColor:'#1B2A4A', borderWidth:2}] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{color:'#A0B0C0'}}} }
+  });
+  chartRefs.push(c);
+}
+function drawMonthBar(){
+  const canvas = document.getElementById('monthBar');
+  if(!canvas) return;
+  const months = [];
+  const counts = [];
+  const now = new Date();
+  for(let i=11;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    months.push(`${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`);
+    counts.push(S.wodLogs.filter(w=>w.category!=='system' && w.date.startsWith(ym)).length);
+  }
+  const c = new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{ labels:months, datasets:[{label:'WODs', data:counts, backgroundColor:'#F5C518', borderRadius:4}] },
+    options:{ responsive:true, maintainAspectRatio:false, scales:{x:{ticks:{color:'#A0B0C0'}}, y:{ticks:{color:'#A0B0C0'},beginAtZero:true}}, plugins:{legend:{display:false}} }
+  });
+  chartRefs.push(c);
+}
+
+function renderOpenView(){
+  const arr = [...S.openScores].sort((a,b)=>(b.year-a.year));
+  const byYear = {};
+  arr.forEach(o=>{ (byYear[o.year]=byYear[o.year]||[]).push(o); });
+  return `
+    <button class="btn primary full" onclick="openOpenForm()" style="margin-bottom:12px">+ Add Open Score</button>
+    ${arr.length>0 ? `<div class="card"><h2>📈 Yearly Comparison (best percentile)</h2><div style="height:200px"><canvas id="openChart"></canvas></div></div>` : ''}
+    ${Object.keys(byYear).length === 0 ? '<div class="empty">No Open scores logged yet</div>' :
+      Object.keys(byYear).sort((a,b)=>b-a).map(y=>`
+        <div class="card">
+          <h2>${y} CrossFit Open</h2>
+          ${byYear[y].map(o=>`<div class="record-item">
+            <div class="lhs">
+              <div class="name">${escapeHtml(o.workout)} ${o.division?`<span class="chip">${escapeHtml(o.division)}</span>`:''}</div>
+              <div class="meta">Score ${escapeHtml(o.score||'—')}${o.rank?` · Rank #${escapeHtml(o.rank)}`:''}${o.percentile?` · ${escapeHtml(o.percentile)}%ile`:''}${o.notes?' · '+escapeHtml(o.notes):''}</div>
+            </div>
+            <button class="btn sm danger" onclick="delOpen('${o.id}')">×</button>
+          </div>`).join('')}
+        </div>
+      `).join('')
+    }
+  `;
+}
+function drawOpenChart(){
+  const canvas = document.getElementById('openChart');
+  if(!canvas) return;
+  const byYear = {};
+  S.openScores.forEach(o=>{
+    const p = parseFloat(o.percentile);
+    if(!isNaN(p)) byYear[o.year] = Math.max(byYear[o.year]||0, p);
+  });
+  const years = Object.keys(byYear).sort();
+  if(years.length === 0){ canvas.parentElement.innerHTML = '<div class="empty">No percentile data</div>'; return; }
+  const c = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{ labels: years, datasets:[{label:'Best Percentile', data: years.map(y=>byYear[y]), borderColor:'#F5C518', backgroundColor:'rgba(245,197,24,0.2)', tension:0.3, fill:true, pointRadius:6}] },
+    options:{ responsive:true, maintainAspectRatio:false, scales:{x:{ticks:{color:'#A0B0C0'}}, y:{ticks:{color:'#A0B0C0'},min:0,max:100}}, plugins:{legend:{labels:{color:'#A0B0C0'}}} }
+  });
+  chartRefs.push(c);
+}
+
+function openOpenForm(){
+  const yrs = []; for(let y=2026; y>=2010; y--) yrs.push(y);
+  showModal(`
+    <h2>Log Open Score <button class="close" onclick="closeModal()">✕</button></h2>
+    <div class="form-row"><label>Year</label><select id="op_y">${yrs.map(y=>`<option>${y}</option>`).join('')}</select></div>
+    <div class="form-row"><label>Workout (e.g. 24.1)</label><input id="op_w" placeholder="24.1"></div>
+    <div class="form-row grid2">
+      <div><label>Score (reps/time)</label><input id="op_s"></div>
+      <div><label>Division</label><input id="op_d" placeholder="Rx / Scaled"></div>
+    </div>
+    <div class="form-row grid2">
+      <div><label>Rank</label><input id="op_r"></div>
+      <div><label>Percentile</label><input id="op_p" placeholder="0-100"></div>
+    </div>
+    <div class="form-row"><label>Notes</label><input id="op_n"></div>
+    <button class="btn primary full lg" onclick="saveOpen()">Save</button>
+  `);
+}
+function saveOpen(){
+  const year = parseInt(document.getElementById('op_y').value);
+  const workout = document.getElementById('op_w').value.trim();
+  const score = document.getElementById('op_s').value.trim();
+  const division = document.getElementById('op_d').value.trim();
+  const rank = document.getElementById('op_r').value.trim();
+  const percentile = document.getElementById('op_p').value.trim();
+  const notes = document.getElementById('op_n').value.trim();
+  if(!year || !workout){ toast('Year and workout required'); return; }
+  S.openScores.push({id:uid(), year, workout, score, division, rank, percentile, notes});
+  saveState(); closeModal(); toast('Saved'); renderAnalysis();
+}
+function delOpen(id){
+  if(!confirm('Delete?')) return;
+  S.openScores = S.openScores.filter(o=>o.id!==id);
+  saveState(); renderAnalysis();
+}
+
+//=========================================================
+// SETTINGS TAB
+//=========================================================
+function renderSettings(){
+  const a = document.getElementById('settingsArea');
+  a.innerHTML = `
+    <div class="card">
+      <h2>🎨 Appearance</h2>
+      <div class="form-row">
+        <label>Theme</label>
+        <div class="opt-row" id="set_theme">
+          <div class="opt${S.settings.theme==='dark'?' active':''}" data-v="dark">🌙 Dark</div>
+          <div class="opt${S.settings.theme==='light'?' active':''}" data-v="light">☀️ Light</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Weight Unit (applies app-wide)</label>
+        <div class="opt-row" id="set_units">
+          <div class="opt${S.settings.unit==='lb'?' active':''}" data-v="lb">lb</div>
+          <div class="opt${S.settings.unit==='kg'?' active':''}" data-v="kg">kg</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>💾 Backup & Restore</h2>
+      <button class="btn full" id="btnExport">Export JSON Backup</button>
+      <div style="height:8px"></div>
+      <button class="btn full" id="btnImport">Import JSON</button>
+      <input type="file" id="fileInput" accept="application/json" style="display:none">
+      <div style="height:8px"></div>
+      <button class="btn full danger" id="btnReset">🚨 Reset All Data</button>
+    </div>
+    <div class="card">
+      <h2>📊 Data Summary</h2>
+      <div class="muted">
+        WODs: ${S.wodLogs.length} · Custom: ${S.customWods.length} · Lifts: ${S.liftingRecords.length} · Gymnastics: ${S.gymnasticsRecords.length} · Running: ${S.runningRecords.length} · Open: ${S.openScores.length}
+      </div>
+    </div>
+    <div class="card">
+      <h2>ℹ️ About</h2>
+      <div class="muted">Sweatbuki · CrossFit Tracking App<br>All data stays on your device (localStorage).</div>
+    </div>
+  `;
+  document.querySelectorAll('#set_theme .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      document.querySelectorAll('#set_theme .opt').forEach(x=>x.classList.remove('active'));
+      o.classList.add('active');
+      S.settings.theme = o.dataset.v; saveState(); applyTheme();
+    });
+  });
+  document.querySelectorAll('#set_units .opt').forEach(o=>{
+    o.addEventListener('click', ()=>{
+      document.querySelectorAll('#set_units .opt').forEach(x=>x.classList.remove('active'));
+      o.classList.add('active');
+      S.settings.unit = o.dataset.v; saveState();
+      toast(`Unit → ${o.dataset.v}`);
+      renderSettings();
+    });
+  });
+  document.getElementById('btnExport').addEventListener('click', exportJson);
+  document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('fileInput').click());
+  document.getElementById('fileInput').addEventListener('change', importJson);
+  document.getElementById('btnReset').addEventListener('click', resetAll);
+}
+
+function exportJson(){
+  const blob = new Blob([JSON.stringify(S, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `sweatbuki-backup-${today()}.json`; a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded');
+}
+function importJson(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(!confirm('Overwrite current data with this backup?')) return;
+      S = Object.assign({wodLogs:[],customWods:[],liftingRecords:[],gymnasticsRecords:[],runningRecords:[],openScores:[],settings:{theme:'dark',unit:'lb'}}, data);
+      if(!Array.isArray(S.runningRecords)) S.runningRecords = [];
+      migrateState();
+      saveState(); applyTheme(); renderSettings();
+      toast('Restored');
+    }catch(err){ toast('Invalid file'); }
+  };
+  r.readAsText(file);
+  e.target.value = '';
+}
+function resetAll(){
+  if(!confirm('Delete ALL data? This cannot be undone.')) return;
+  if(!confirm('Really delete everything?')) return;
+  localStorage.removeItem(KEY);
+  S = {wodLogs:[],customWods:[],liftingRecords:[],gymnasticsRecords:[],runningRecords:[],openScores:[],settings:{theme:'dark',unit:'lb'}};
+  applyTheme(); renderSettings();
+  toast('All data wiped');
+}
+
+//=========================================================
+// INIT
+//=========================================================
+loadState();
+applyTheme();
+renderWod();
+
+setTimeout(()=>{
+  document.getElementById('splash').classList.add('hide');
+  setTimeout(()=>document.getElementById('splash').remove(), 600);
+}, 1200);
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+document.addEventListener('click', ensureAudio, {once:true});
+document.addEventListener('touchstart', ensureAudio, {once:true});
+</script>
+</body>
+</html>
