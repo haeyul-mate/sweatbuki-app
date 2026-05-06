@@ -1682,7 +1682,6 @@ function bindLiftHandlers(){
   const calcInp=document.getElementById('calc1rm');
   if(calcInp){ calcInp.addEventListener('input', updateLiftPct); updateLiftPct(); }
   bindCardioM();
-  bindCardioC();
   bindUnitConv();
   bindCalc();
   bindBarLoader();
@@ -1792,7 +1791,7 @@ function renderPctCalc(){
           <div class="opt" data-v="row">Row</div>
           <div class="opt" data-v="bikeerg">Bike-erg</div>
           <div class="opt" data-v="skierg">Ski-erg</div>
-          <div class="opt" data-v="assault">Assault</div>
+          <div class="opt" data-v="assault">Air Bike</div>
         </div>
       </div>
       <div class="form-row grid2">
@@ -1806,32 +1805,7 @@ function renderPctCalc(){
       </div>
       <div id="cm_out" style="margin-top:12px"></div>
     </div>
-    <div class="muted">Run 1000m ≈ Row 1250/1000m · Bike-erg 2000m · Ski-erg 1250/1000m · Assault 75/50 cal (M/F).</div>
-
-    <div class="card" style="margin-top:14px">
-      <h2>Cardio Converter — Calories / Shuttle</h2>
-      <div class="form-row">
-        <label>Sport</label>
-        <div class="opt-row" id="cc_sport">
-          <div class="opt active" data-v="shuttle">Shuttle</div>
-          <div class="opt" data-v="row">Row</div>
-          <div class="opt" data-v="assault">Assault</div>
-          <div class="opt" data-v="bikeski">Bike/Ski</div>
-          <div class="opt" data-v="run">Run</div>
-        </div>
-      </div>
-      <div class="form-row grid2">
-        <div><label>Amount (<span id="cc_unit">shuttles</span>)</label><input type="number" id="cc_val" step="1" value="10"></div>
-        <div><label>Gender</label>
-          <div class="opt-row" id="cc_gender">
-            <div class="opt active" data-v="M">M</div>
-            <div class="opt" data-v="F">F</div>
-          </div>
-        </div>
-      </div>
-      <div id="cc_out" style="margin-top:12px"></div>
-    </div>
-    <div class="muted">1 Shuttle ≈ Row/Bike·Ski-Erg 1 cal · Assault 0.7 cal · Run 10m (M) / 15m (F).</div>
+    <div class="muted">Run 1000m ≈ Row 1250/1000m · Bike-erg 2000m · Ski-erg 1250/1000m · Air Bike 75/50 cal (M/F).</div>
 
     <div class="card" style="margin-top:14px">
       <h2>Unit Converter</h2>
@@ -1901,7 +1875,7 @@ const CARDIO_M = {
   row:     { M: 1.25,  F: 1.0,  unit: 'm',   label: 'Row' },
   bikeerg: { M: 2.0,   F: 2.0,  unit: 'm',   label: 'Bike-erg' },
   skierg:  { M: 1.25,  F: 1.0,  unit: 'm',   label: 'Ski-erg' },
-  assault: { M: 0.075, F: 0.05, unit: 'cal', label: 'Assault Bike' }
+  assault: { M: 0.075, F: 0.05, unit: 'cal', label: 'Air Bike' }
 };
 function updateCardioM(){
   const sport  = document.querySelector('#cm_sport .opt.active')?.dataset.v  || 'run';
@@ -1932,45 +1906,6 @@ function bindCardioM(){
   });
   document.getElementById('cm_val').addEventListener('input', updateCardioM);
   updateCardioM();
-}
-
-// Cardio calorie chart: amount of {sport} per 1 shuttle (10-m)
-const CARDIO_C = {
-  shuttle: { M: 1.0, F: 1.0,  unit: 'shuttles', label: '10-m Shuttle' },
-  row:     { M: 1.0, F: 1.0,  unit: 'cal',      label: 'Row' },
-  assault: { M: 0.7, F: 0.7,  unit: 'cal',      label: 'Assault Bike' },
-  bikeski: { M: 1.0, F: 1.0,  unit: 'cal',      label: 'Bike/Ski-Erg' },
-  run:     { M: 10,  F: 15,   unit: 'm',        label: 'Run' }
-};
-function updateCardioC(){
-  const sport  = document.querySelector('#cc_sport .opt.active')?.dataset.v  || 'shuttle';
-  const gender = document.querySelector('#cc_gender .opt.active')?.dataset.v || 'M';
-  const val = parseFloat(document.getElementById('cc_val').value) || 0;
-  document.getElementById('cc_unit').textContent = CARDIO_C[sport].unit;
-  const shuttles = val / CARDIO_C[sport][gender];
-  document.getElementById('cc_out').innerHTML = `<div class="lift-pct">${
-    Object.keys(CARDIO_C).filter(k=>k!==sport).map(k=>{
-      const v = shuttles * CARDIO_C[k][gender];
-      return `<div class="row"><span class="pp">${CARDIO_C[k].label}</span><span class="pv">${Math.round(v*10)/10} ${CARDIO_C[k].unit}</span></div>`;
-    }).join('')
-  }</div>`;
-}
-function bindCardioC(){
-  if(!document.getElementById('cc_val')) return;
-  document.querySelectorAll('#cc_sport .opt').forEach(o=>{
-    o.addEventListener('click', ()=>{
-      document.querySelectorAll('#cc_sport .opt').forEach(x=>x.classList.remove('active'));
-      o.classList.add('active'); updateCardioC();
-    });
-  });
-  document.querySelectorAll('#cc_gender .opt').forEach(o=>{
-    o.addEventListener('click', ()=>{
-      document.querySelectorAll('#cc_gender .opt').forEach(x=>x.classList.remove('active'));
-      o.classList.add('active'); updateCardioC();
-    });
-  });
-  document.getElementById('cc_val').addEventListener('input', updateCardioC);
-  updateCardioC();
 }
 
 // Length unit converter — m ↔ ft, km ↔ mi (all four linked)
