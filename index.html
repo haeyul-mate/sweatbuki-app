@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<style>
+  /* 가짜 배너 자리가 강제로 살아나도 무조건 투명하게 숨기고 터치 방해 금지 */
+  #banner-top, [id*="banner"] {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1B2A4A">
