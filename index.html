@@ -290,16 +290,6 @@ canvas{max-width:100%}
   </div>
 </header>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7246195972112653" crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-     style="display:block; width:100%; height:60px; margin: 10px 0;"
-     data-ad-client="ca-pub-7246195972112653"
-     data-ad-slot="9841086791"
-     data-ad-format="horizontal"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-
 <main>
 
 <section class="tab active" id="tab-wod">
@@ -309,6 +299,9 @@ canvas{max-width:100%}
     <div class="pill" data-wpill="custom">Custom</div>
     <div class="pill" data-wpill="log">Log</div>
   </div>
+  <div style="padding: 0 15px 15px 15px;">
+  <input type="text" id="searchWodInput" placeholder="🔍 와드 이름 검색 (예: Murph, 14.5)" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #555; background-color: #1B2A4A; color: white; font-size: 16px; box-sizing: border-box;">
+</div>
   <div id="wodArea"></div>
 </section>
 
@@ -2754,6 +2747,27 @@ if('serviceWorker' in navigator){
 document.addEventListener('click', ensureAudio, {once:true});
 document.addEventListener('touchstart', ensureAudio, {once:true});
 </script>
-
+<script>
+// 와드 실시간 검색 기능 로직
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchWodInput');
+  if(searchInput) {
+    searchInput.addEventListener('input', function() {
+      const filter = this.value.toLowerCase();
+      // wodArea 안에 생성된 와드 카드들을 모두 선택
+      const cards = document.querySelectorAll('#wodArea > div'); 
+      
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        if(text.includes(filter)) {
+          card.style.display = ''; // 검색어가 있으면 보여주기
+        } else {
+          card.style.display = 'none'; // 검색어가 없으면 숨기기
+        }
+      });
+    });
+  }
+});
+</script>
 </body>
 </html>
