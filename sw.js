@@ -1,4 +1,4 @@
-const CACHE = 'sweatbuki-v4';
+const CACHE = 'sweatbuki-v5';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
