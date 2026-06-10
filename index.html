@@ -11,9 +11,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231B2A4A' rx='32'/><text x='96' y='132' font-size='110' text-anchor='middle'>💪</text></svg>">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
   --navy:#1B2A4A; --navy-dark:#0D1B2E; --navy-mid:#162038;
   --gold:#F5C518; --gold-light:#FDF0A0;
   --white:#FFFFFF; --text:#FFFFFF; --text2:#A0B0C0;
@@ -2733,11 +2732,20 @@ loadState();
 applyTheme();
 renderWod();
 
-setTimeout(()=>{
-  document.getElementById('splash').classList.add('hide');
-  setTimeout(()=>document.getElementById('splash').remove(), 600);
-}, 1200);
-
+function hideSplash() {
+  const sp = document.getElementById('splash');
+  if(!sp) return;
+  sp.classList.add('hide');
+  setTimeout(()=>{ if(sp.parentNode) sp.remove(); }, 600);
+}
+let splashDone = false;
+function triggerSplash() {
+  if(splashDone) return;
+  splashDone = true;
+  hideSplash();
+}
+setTimeout(triggerSplash, 2500);
+window.addEventListener('load', () => setTimeout(triggerSplash, 300));
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').catch(()=>{});
