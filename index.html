@@ -341,6 +341,17 @@ canvas{max-width:100%}
 <section class="tab" id="tab-settings">
   <div class="section-title">⚙️ Settings</div>
   <div id="settingsArea"></div>
+  <div style="padding: 20px;">
+  <h3 style="color: #ccc; margin-bottom: 10px;">데이터 백업 및 복구</h3>
+  <p style="color: #888; font-size: 13px; margin-bottom: 15px;">기기를 변경하거나 앱을 다시 설치할 때 기존 기록을 유지하려면 백업 파일을 저장해두세요.</p>
+  
+  <!-- 백업 버튼 -->
+  <button onclick="exportData()" style="width: 100%; padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-bottom: 15px; cursor: pointer;">📥 기록 백업하기 (JSON 저장)</button>
+  
+  <!-- 복구 버튼 -->
+  <label for="importFile" style="display: block; width: 100%; padding: 12px; background-color: #2196F3; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; text-align: center; cursor: pointer; box-sizing: border-box;">📤 기록 복구하기 (파일 업로드)</label>
+  <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+</div>
 </section>
 
 </main>
@@ -2768,6 +2779,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+</script>
+  <script>
+// JSON 백업 (다운로드) 로직
+function exportData() {
+  const data = JSON.stringify(localStorage);
+  const blob = new Blob([data], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "sweatbuki_backup.json"; // 다운로드될 파일 이름
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// JSON 복구 (업로드) 로직
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      for (let key in data) {
+        localStorage.setItem(key, data[key]);
+      }
+      alert("✅ 기록 복구가 완벽하게 완료되었습니다! 화면을 새로고침합니다.");
+      location.reload(); 
+    } catch (err) {
+      alert("❌ 잘못된 파일 형식입니다.");
+    }
+  };
+  reader.readAsText(file);
+}
 </script>
 </body>
 </html>
