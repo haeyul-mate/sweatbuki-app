@@ -1,23 +1,29 @@
-// 기존 캐시를 모두 파괴하고 네트워크에서만 최신 파일을 가져오는 강제 초기화 코드
-self.addEventListener('install', function(e) {
-  self.skipWaiting(); // 대기 없이 즉시 새 서비스 워커 적용
+const CACHE = 'sweatbuki-v4';
+const ASSETS = ['./', './index.html', './manifest.json'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 
-self.addEventListener('activate', function(e) {
+self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          return caches.delete(cacheName); // 폰에 남은 모든 옛날 화면 찌꺼기 삭제
-        })
-      );
-    }).then(function() {
-      return self.clients.claim(); // 즉시 제어권 확보
-    })
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', function(e) {
-  // 캐시를 절대 사용하지 않고 무조건 서버(Vercel)에서 최신 파일을 가져옴
-  e.respondWith(fetch(e.request));
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => cached);
+    })
+  );
 });
