@@ -1944,7 +1944,7 @@ function bindUnitConv(){
     if(src !== mi) mi.value = trim(meters * 0.000621371, 4);
     busy = false;
   }
-  m.addEventListener('input',  => fromMeters((parseFloat(m.value) ||0),                    m));
+ m.addEventListener('input',  ()=> fromMeters((parseFloat(m.value) ||0),                    m));
   ft.addEventListener('input', ()=> fromMeters((parseFloat(ft.value)||0) / 3.28084,          ft));
   km.addEventListener('input', ()=> fromMeters((parseFloat(km.value)||0) * 1000,             km));
   mi.addEventListener('input', ()=> fromMeters((parseFloat(mi.value)||0) / 0.000621371,      mi));
